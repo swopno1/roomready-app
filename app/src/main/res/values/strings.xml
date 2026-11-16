@@ -45,6 +45,28 @@
     <string name="empty_profile_action">Configure PMS</string>
     <string name="empty_profile_artwork_cd">Illustration of a staff badge beside the Ready Door emblem</string>
 
+    <!-- Turnover Checklist (verbatim, fixed order) -->
+    <string name="checklist_step_bed_linen">Change bed linen</string>
+    <string name="checklist_step_towels_toiletries">Fresh towels &amp; toiletries</string>
+    <string name="checklist_step_vacuum_mop">Vacuum &amp; mop</string>
+    <string name="checklist_step_bathroom_deep_clean">Bathroom deep clean</string>
+    <string name="checklist_step_minibar_restock">Minibar restock</string>
+    <string name="checklist_step_ac_lights_sockets">AC/lights/sockets check</string>
+    <string name="checklist_step_balcony_tidy">Balcony tidy</string>
+    <string name="checklist_step_final_walkthrough">Final walkthrough</string>
+
+    <!-- Ticket Categories -->
+    <string name="ticket_category_plumbing">Plumbing</string>
+    <string name="ticket_category_electrical">Electrical</string>
+    <string name="ticket_category_linen">Linen</string>
+    <string name="ticket_category_minibar">Minibar</string>
+    <string name="ticket_category_furniture">Furniture</string>
+    <string name="ticket_category_other">Other</string>
+
+    <!-- Staff Roles -->
+    <string name="role_housekeeper">Housekeeper</string>
+    <string name="role_supervisor">Supervisor</string>
+
     <!-- Language & Feedback -->
     <string name="language_label">Language</string>
     <string name="language_english">English</string>
