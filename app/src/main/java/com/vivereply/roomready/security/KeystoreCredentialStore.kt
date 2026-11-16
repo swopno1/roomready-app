@@ -1,3 +1,8 @@
+// EncryptedSharedPreferences/MasterKey are deprecated in security-crypto 1.1.0
+// but remain the Keystore-backed encrypted store with no successor in this
+// artifact; the SecureCredentialStore interface isolates them for a future swap.
+@file:Suppress("DEPRECATION")
+
 package com.vivereply.roomready.security
 
 import android.content.Context
@@ -16,10 +21,6 @@ class KeystoreCredentialStore(context: Context) : SecureCredentialStore {
 
   private val appContext: Context = context.applicationContext
 
-  // EncryptedSharedPreferences is deprecated in security-crypto 1.1.0 but remains
-  // the Keystore-backed encrypted store with no successor in this artifact; the
-  // SecureCredentialStore interface isolates it for a future swap.
-  @Suppress("DEPRECATION")
   private val prefs: SharedPreferences by lazy {
     val masterKey =
       MasterKey.Builder(appContext).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()

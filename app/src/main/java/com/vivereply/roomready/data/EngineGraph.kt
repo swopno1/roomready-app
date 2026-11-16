@@ -2,6 +2,10 @@ package com.vivereply.roomready.data
 
 import android.content.Context
 import com.vivereply.roomready.data.local.RoomReadyDatabase
+import com.vivereply.roomready.data.pms.ConnectionPrefs
+import com.vivereply.roomready.data.pms.HttpPmsApi
+import com.vivereply.roomready.data.pms.PmsApi
+import com.vivereply.roomready.data.pms.SyncOrchestrator
 import com.vivereply.roomready.data.repository.ActivityRepository
 import com.vivereply.roomready.data.repository.RoomRepository
 import com.vivereply.roomready.data.repository.TicketRepository
@@ -21,10 +25,15 @@ class EngineGraph(context: Context, val clock: Clock = SystemClock) {
 
   val credentials: SecureCredentialStore by lazy { KeystoreCredentialStore(appContext) }
 
+  val conn: ConnectionPrefs by lazy { ConnectionPrefs(appContext) }
+
+  val pmsApi: PmsApi by lazy { HttpPmsApi() }
+
   val rooms: RoomRepository by lazy {
     RoomRepository(
       database.roomUnitDao(),
       database.roomTypeDao(),
+      database.staffRosterDao(),
       database.checklistDao(),
       database.activityDao(),
       database.syncQueueDao(),
@@ -47,4 +56,16 @@ class EngineGraph(context: Context, val clock: Clock = SystemClock) {
   /** Sync engine bound to a transport; local actions never touch the network. */
   fun syncEngine(transport: PmsTransport): SyncEngine =
     SyncEngine(database.syncQueueDao(), database.activityDao(), transport, clock)
+
+  val orchestrator: SyncOrchestrator by lazy {
+    SyncOrchestrator(
+      pmsApi,
+      credentials,
+      conn,
+      rooms,
+      database.syncQueueDao(),
+      database.activityDao(),
+      clock,
+    )
+  }
 }

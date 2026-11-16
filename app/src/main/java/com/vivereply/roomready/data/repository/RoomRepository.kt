@@ -9,6 +9,8 @@ import com.vivereply.roomready.data.local.RoomTypeDao
 import com.vivereply.roomready.data.local.RoomTypeEntity
 import com.vivereply.roomready.data.local.RoomUnitDao
 import com.vivereply.roomready.data.local.RoomUnitEntity
+import com.vivereply.roomready.data.local.StaffRosterDao
+import com.vivereply.roomready.data.local.StaffRosterEntity
 import com.vivereply.roomready.data.local.SyncMutationEntity
 import com.vivereply.roomready.data.local.SyncQueueDao
 import com.vivereply.roomready.data.sync.SyncEntityType
@@ -53,6 +55,7 @@ data class BootstrapImportResult(
 class RoomRepository(
   private val units: RoomUnitDao,
   private val types: RoomTypeDao,
+  private val roster: StaffRosterDao,
   private val steps: ChecklistDao,
   private val activity: ActivityDao,
   private val queue: SyncQueueDao,
@@ -63,6 +66,8 @@ class RoomRepository(
     units.observeAll().map { list -> list.map(RoomUnitEntity::toDomain) }
 
   suspend fun getUnit(unitId: String): RoomUnit? = units.getById(unitId)?.toDomain()
+
+  suspend fun roomTypes(): List<RoomType> = types.getAll().map(RoomTypeEntity::toDomain)
 
   suspend fun progress(unitId: String): ChecklistProgress =
     ChecklistProgress(
@@ -247,6 +252,14 @@ class RoomRepository(
     )
     return BootstrapImportResult(roomTypes.size, roomUnits.size, preserved)
   }
+
+  /** Replaces the staff roster snapshot from a bootstrap import. */
+  suspend fun importRoster(staff: List<StaffMember>) {
+    roster.clear()
+    if (staff.isNotEmpty()) roster.upsertAll(staff.map(StaffRosterEntity::fromDomain))
+  }
+
+  suspend fun roster(): List<StaffMember> = roster.getAll().map(StaffRosterEntity::toDomain)
 
   private suspend fun logStatusChange(
     unit: RoomUnitEntity,

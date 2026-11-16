@@ -23,8 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.vivereply.roomready.R
 import com.vivereply.roomready.ui.components.EmptyStateArtwork
+import com.vivereply.roomready.ui.components.LanguageSelectorRow
 import com.vivereply.roomready.ui.components.LogoLockupVariant
 import com.vivereply.roomready.ui.components.RoomReadyLogoLockup
 import com.vivereply.roomready.ui.navigation.RoomReadyDestination
@@ -86,31 +85,11 @@ fun TabEmptyStateScreen(
               showTagline = true,
             )
             Spacer(modifier = Modifier.height(spacing.sm))
-            Row(
-              modifier = Modifier.fillMaxWidth(),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-              Text(
-                text = stringResource(R.string.language_label),
-                style = MaterialTheme.typography.titleSmall,
-                color = colors.onInk,
-              )
-              Row(horizontalArrangement = Arrangement.spacedBy(spacing.xs)) {
-                LanguageChoiceChip(
-                  label = stringResource(R.string.language_english),
-                  selected = !currentLanguageTag.startsWith("bn"),
-                  onClick = { onLanguageSelected("en") },
-                  testTag = "lang_chip_en",
-                )
-                LanguageChoiceChip(
-                  label = stringResource(R.string.language_bengali),
-                  selected = currentLanguageTag.startsWith("bn"),
-                  onClick = { onLanguageSelected("bn") },
-                  testTag = "lang_chip_bn",
-                )
-              }
-            }
+            LanguageSelectorRow(
+              currentLanguageTag = currentLanguageTag,
+              onLanguageSelected = onLanguageSelected,
+              dark = true,
+            )
           }
         }
       }
@@ -190,37 +169,3 @@ fun TabEmptyStateScreen(
   }
 }
 
-@Composable
-private fun LanguageChoiceChip(
-  label: String,
-  selected: Boolean,
-  onClick: () -> Unit,
-  testTag: String,
-) {
-  val colors = RoomReadyThemeTokens.colors
-  FilterChip(
-    selected = selected,
-    onClick = onClick,
-    modifier = Modifier.minimumInteractiveComponentSize().testTag(testTag),
-    label = {
-      Text(
-        text = label,
-        style = MaterialTheme.typography.labelMedium,
-      )
-    },
-    colors =
-      FilterChipDefaults.filterChipColors(
-        selectedContainerColor = colors.mintSolid,
-        selectedLabelColor = colors.ink,
-        containerColor = colors.inkSecondary.copy(alpha = 0.45f),
-        labelColor = colors.onInk,
-      ),
-    border =
-      FilterChipDefaults.filterChipBorder(
-        enabled = true,
-        selected = selected,
-        borderColor = colors.inkSecondary,
-        selectedBorderColor = colors.mintSolid,
-      ),
-  )
-}

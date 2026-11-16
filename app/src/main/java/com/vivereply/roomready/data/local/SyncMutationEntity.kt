@@ -20,4 +20,6 @@ data class SyncMutationEntity(
   val dueAt: Long,
   val status: SyncEntryStatus = SyncEntryStatus.PENDING,
   val updatedAt: Long,
+  /** Why the entry was parked/failed, e.g. "HTTP 400". Never holds secrets. */
+  val lastError: String? = null,
 )

@@ -18,6 +18,8 @@ enum class SyncEntryStatus {
   PENDING,
   IN_FLIGHT,
   FAILED,
+  /** Refused by the PMS (e.g. HTTP 400): never retried, flagged for staff. */
+  PARKED,
 }
 
 /**

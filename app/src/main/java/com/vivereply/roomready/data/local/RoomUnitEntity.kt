@@ -16,6 +16,7 @@ data class RoomUnitEntity(
   val occupancy: Occupancy,
   val hkState: HousekeepingState,
   val updatedAt: Long,
+  val housekeepingAt: Long? = null,
 ) {
   fun toDomain(): RoomUnit =
     RoomUnit(
@@ -26,6 +27,7 @@ data class RoomUnitEntity(
       occupancy = occupancy,
       hkState = hkState,
       updatedAtEpochMillis = updatedAt,
+      housekeepingAtEpochMillis = housekeepingAt,
     )
 
   companion object {
@@ -38,6 +40,7 @@ data class RoomUnitEntity(
         occupancy = unit.occupancy,
         hkState = unit.hkState,
         updatedAt = unit.updatedAtEpochMillis,
+        housekeepingAt = unit.housekeepingAtEpochMillis,
       )
   }
 }

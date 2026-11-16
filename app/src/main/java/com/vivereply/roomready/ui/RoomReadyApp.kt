@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,8 +27,6 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -37,7 +34,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,22 +41,39 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.vivereply.roomready.R
+import com.vivereply.roomready.data.EngineGraph
 import com.vivereply.roomready.ui.components.LogoLockupVariant
 import com.vivereply.roomready.ui.components.RoomReadyLogoLockup
 import com.vivereply.roomready.ui.navigation.RoomReadyDestination
+import com.vivereply.roomready.ui.navigation.RoomReadyRoute
+import com.vivereply.roomready.ui.screens.ActivityRoute
+import com.vivereply.roomready.ui.screens.HomeRoute
+import com.vivereply.roomready.ui.screens.ProfileRoute
+import com.vivereply.roomready.ui.screens.QrScanScreen
+import com.vivereply.roomready.ui.screens.RoomsRoute
+import com.vivereply.roomready.ui.screens.SetupRoute
 import com.vivereply.roomready.ui.screens.TabEmptyStateScreen
+import com.vivereply.roomready.ui.screens.TicketsRoute
+import com.vivereply.roomready.ui.state.ActivityFeedViewModel
+import com.vivereply.roomready.ui.state.BoardViewModel
+import com.vivereply.roomready.ui.state.ConnectionViewModel
+import com.vivereply.roomready.ui.state.GraphViewModelFactory
+import com.vivereply.roomready.ui.state.SetupViewModel
+import com.vivereply.roomready.ui.state.TicketsViewModel
 import com.vivereply.roomready.ui.theme.RoomReadyThemeTokens
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomReadyApp(
+  graph: EngineGraph,
   currentLanguageTag: String,
   onLanguageSelected: (String) -> Unit,
   modifier: Modifier = Modifier,
@@ -69,13 +82,18 @@ fun RoomReadyApp(
   val spacing = RoomReadyThemeTokens.spacing
   val radius = RoomReadyThemeTokens.radius
 
+  val factory = remember(graph) { GraphViewModelFactory(graph) }
+  val connection: ConnectionViewModel = viewModel(factory = factory)
+  val setup: SetupViewModel = viewModel(factory = factory)
+  val board: BoardViewModel = viewModel(factory = factory)
+  val activityFeed: ActivityFeedViewModel = viewModel(factory = factory)
+  val tickets: TicketsViewModel = viewModel(factory = factory)
+  val connected by connection.status.collectAsStateWithLifecycle()
+
   val navController = rememberNavController()
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route ?: RoomReadyDestination.Home.route
-
-  val snackbarHostState = remember { SnackbarHostState() }
-  val coroutineScope = rememberCoroutineScope()
-  val connectFeedbackMessage = stringResource(R.string.action_connect_prompt_feedback)
+  val onFullScreenRoute = currentRoute == RoomReadyRoute.SETUP || currentRoute == RoomReadyRoute.QR_SCAN
 
   fun navigateToTab(destination: RoomReadyDestination) {
     navController.navigate(destination.route) {
@@ -89,7 +107,7 @@ fun RoomReadyApp(
     val useRail = maxWidth >= 600.dp
 
     Row(modifier = Modifier.fillMaxSize()) {
-      if (useRail) {
+      if (useRail && !onFullScreenRoute) {
         NavigationRail(
           containerColor = colors.surface,
           contentColor = colors.ink,
@@ -135,7 +153,6 @@ fun RoomReadyApp(
         modifier = Modifier.weight(1f).fillMaxHeight(),
         containerColor = colors.canvas,
         contentWindowInsets = WindowInsets.safeDrawing,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
           Surface(color = colors.canvas) {
             Box(modifier = Modifier.fillMaxWidth()) {
@@ -165,10 +182,15 @@ fun RoomReadyApp(
                     ) {
                       Box(
                         modifier =
-                          Modifier.size(8.dp).clip(CircleShape).background(colors.inkMuted),
+                          Modifier.size(8.dp).clip(CircleShape)
+                            .background(if (connected.connected) colors.mintSolid else colors.inkMuted),
                       )
                       Text(
-                        text = stringResource(R.string.status_offline_not_linked),
+                        text =
+                          stringResource(
+                            if (connected.connected) R.string.profile_connected
+                            else R.string.status_offline_not_linked,
+                          ),
                         style = MaterialTheme.typography.labelMedium,
                         color = colors.inkSecondary,
                       )
@@ -185,7 +207,7 @@ fun RoomReadyApp(
           }
         },
         bottomBar = {
-          if (!useRail) {
+          if (!useRail && !onFullScreenRoute) {
             Surface(
               color = colors.surface,
               tonalElevation = RoomReadyThemeTokens.elevation.flat,
@@ -243,24 +265,92 @@ fun RoomReadyApp(
           startDestination = RoomReadyDestination.Home.route,
           modifier = Modifier.fillMaxSize().padding(innerPadding),
         ) {
-          RoomReadyDestination.entries.forEach { destination ->
-            composable(destination.route) {
+          composable(RoomReadyDestination.Home.route) {
+            if (connected.connected) {
+              HomeRoute(connection = connection, board = board, languageTag = currentLanguageTag)
+            } else {
               TabEmptyStateScreen(
-                destination = destination,
+                destination = RoomReadyDestination.Home,
                 currentLanguageTag = currentLanguageTag,
                 onLanguageSelected = onLanguageSelected,
-                onPrimaryAction = {
-                  if (destination == RoomReadyDestination.Profile) {
-                    coroutineScope.launch {
-                      snackbarHostState.currentSnackbarData?.dismiss()
-                      snackbarHostState.showSnackbar(connectFeedbackMessage)
-                    }
-                  } else {
-                    navigateToTab(RoomReadyDestination.Profile)
-                  }
-                },
+                onPrimaryAction = { navigateToTab(RoomReadyDestination.Profile) },
               )
             }
+          }
+          composable(RoomReadyDestination.Rooms.route) {
+            if (connected.connected) {
+              RoomsRoute(board = board)
+            } else {
+              TabEmptyStateScreen(
+                destination = RoomReadyDestination.Rooms,
+                currentLanguageTag = currentLanguageTag,
+                onLanguageSelected = onLanguageSelected,
+                onPrimaryAction = { navigateToTab(RoomReadyDestination.Profile) },
+              )
+            }
+          }
+          composable(RoomReadyDestination.Tickets.route) {
+            if (connected.connected) {
+              TicketsRoute(viewModel = tickets)
+            } else {
+              TabEmptyStateScreen(
+                destination = RoomReadyDestination.Tickets,
+                currentLanguageTag = currentLanguageTag,
+                onLanguageSelected = onLanguageSelected,
+                onPrimaryAction = { navigateToTab(RoomReadyDestination.Profile) },
+              )
+            }
+          }
+          composable(RoomReadyDestination.Activity.route) {
+            if (connected.connected) {
+              ActivityRoute(viewModel = activityFeed, languageTag = currentLanguageTag)
+            } else {
+              TabEmptyStateScreen(
+                destination = RoomReadyDestination.Activity,
+                currentLanguageTag = currentLanguageTag,
+                onLanguageSelected = onLanguageSelected,
+                onPrimaryAction = { navigateToTab(RoomReadyDestination.Profile) },
+              )
+            }
+          }
+          composable(RoomReadyDestination.Profile.route) {
+            if (connected.connected) {
+              ProfileRoute(
+                graph = graph,
+                connection = connection,
+                languageTag = currentLanguageTag,
+                onLanguageSelected = onLanguageSelected,
+                onEditConnection = { navController.navigate(RoomReadyRoute.SETUP) },
+              )
+            } else {
+              TabEmptyStateScreen(
+                destination = RoomReadyDestination.Profile,
+                currentLanguageTag = currentLanguageTag,
+                onLanguageSelected = onLanguageSelected,
+                onPrimaryAction = { navController.navigate(RoomReadyRoute.SETUP) },
+              )
+            }
+          }
+          composable(RoomReadyRoute.SETUP) {
+            SetupRoute(
+              viewModel = setup,
+              onConnected = {
+                connection.refresh()
+                board.refreshTypes()
+                navController.popBackStack()
+                navigateToTab(RoomReadyDestination.Home)
+              },
+              onScanQr = { navController.navigate(RoomReadyRoute.QR_SCAN) },
+            )
+          }
+          composable(RoomReadyRoute.QR_SCAN) {
+            QrScanScreen(
+              onPairing = { pairing ->
+                setup.prefill(pairing)
+                navController.popBackStack()
+              },
+              onClose = { navController.popBackStack() },
+            )
           }
         }
       }

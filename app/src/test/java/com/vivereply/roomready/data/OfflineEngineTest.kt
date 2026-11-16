@@ -8,6 +8,8 @@ import com.vivereply.roomready.data.local.RoomTypeDao
 import com.vivereply.roomready.data.local.RoomTypeEntity
 import com.vivereply.roomready.data.local.RoomUnitDao
 import com.vivereply.roomready.data.local.RoomUnitEntity
+import com.vivereply.roomready.data.local.StaffRosterDao
+import com.vivereply.roomready.data.local.StaffRosterEntity
 import com.vivereply.roomready.data.local.SyncMutationEntity
 import com.vivereply.roomready.data.local.SyncQueueDao
 import com.vivereply.roomready.data.local.TicketDao
@@ -44,6 +46,7 @@ class OfflineEngineTest {
 
   private lateinit var units: FakeRoomUnitDao
   private lateinit var types: FakeRoomTypeDao
+  private lateinit var roster: FakeStaffRosterDao
   private lateinit var steps: FakeChecklistDao
   private lateinit var tickets: FakeTicketDao
   private lateinit var activity: FakeActivityDao
@@ -59,12 +62,13 @@ class OfflineEngineTest {
   fun setUp() {
     units = FakeRoomUnitDao()
     types = FakeRoomTypeDao()
+    roster = FakeStaffRosterDao()
     steps = FakeChecklistDao()
     tickets = FakeTicketDao()
     activity = FakeActivityDao()
     queue = FakeSyncQueueDao()
     clock = FakeClock()
-    rooms = RoomRepository(units, types, steps, activity, queue, clock)
+    rooms = RoomRepository(units, types, roster, steps, activity, queue, clock)
     ticketRepo = TicketRepository(units, tickets, activity, queue, clock)
   }
 
@@ -410,6 +414,20 @@ class OfflineEngineTest {
     override suspend fun getAll(): List<RoomTypeEntity> = store.values.sortedBy { it.code }
   }
 
+  private class FakeStaffRosterDao : StaffRosterDao {
+    private val store = mutableMapOf<String, StaffRosterEntity>()
+
+    override suspend fun clear() {
+      store.clear()
+    }
+
+    override suspend fun upsertAll(staff: List<StaffRosterEntity>) {
+      staff.forEach { store[it.name] = it }
+    }
+
+    override suspend fun getAll(): List<StaffRosterEntity> = store.values.sortedBy { it.name }
+  }
+
   private class FakeChecklistDao : ChecklistDao {
     private val store = mutableMapOf<Pair<String, TurnoverStep>, ChecklistStepEntity>()
 
@@ -509,6 +527,12 @@ class OfflineEngineTest {
     override suspend fun markFailed(id: Long, attempts: Int, now: Long) {
       store[id]?.let {
         store[id] = it.copy(status = SyncEntryStatus.FAILED, attempts = attempts, updatedAt = now)
+      }
+    }
+
+    override suspend fun park(id: Long, error: String, now: Long) {
+      store[id]?.let {
+        store[id] = it.copy(status = SyncEntryStatus.PARKED, lastError = error, updatedAt = now)
       }
     }
 

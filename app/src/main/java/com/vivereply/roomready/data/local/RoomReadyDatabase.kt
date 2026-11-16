@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 /** Offline-first local store: units, checklist, tickets, activity, sync queue. */
 @Database(
@@ -15,8 +17,9 @@ import androidx.room.TypeConverters
     TicketEntity::class,
     ActivityEntity::class,
     SyncMutationEntity::class,
+    StaffRosterEntity::class,
   ],
-  version = 1,
+  version = 2,
   exportSchema = false,
 )
 @TypeConverters(RoomConverters::class)
@@ -33,10 +36,30 @@ abstract class RoomReadyDatabase : RoomDatabase() {
 
   abstract fun syncQueueDao(): SyncQueueDao
 
+  abstract fun staffRosterDao(): StaffRosterDao
+
   companion object {
     const val DATABASE_NAME: String = "roomready.db"
 
+    /**
+     * v1 -> v2: PMS housekeeping timestamps on units, refusal reasons on
+     * queued entries, and the staff roster table. Queued mutations survive.
+     */
+    val MIGRATION_1_2: Migration =
+      object : Migration(1, 2) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+          db.execSQL("ALTER TABLE room_units ADD COLUMN housekeepingAt INTEGER")
+          db.execSQL("ALTER TABLE sync_queue ADD COLUMN lastError TEXT")
+          db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `staff_roster` (`name` TEXT NOT NULL, " +
+              "`role` TEXT NOT NULL, PRIMARY KEY(`name`))",
+          )
+        }
+      }
+
     fun create(context: Context): RoomReadyDatabase =
-      Room.databaseBuilder(context, RoomReadyDatabase::class.java, DATABASE_NAME).build()
+      Room.databaseBuilder(context, RoomReadyDatabase::class.java, DATABASE_NAME)
+        .addMigrations(MIGRATION_1_2)
+        .build()
   }
 }

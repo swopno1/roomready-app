@@ -1,0 +1,39 @@
+{
+  "contractVersion": 1,
+  "property": {"id": "demo13", "name": "Krishnachura Retreat"},
+  "roomTypes": [
+    {"id": "rt-terracotta", "code": "TERRA", "nameEn": "Terracotta Villa", "nameBn": "টেরাকোটা ভিলা", "bedSummary": "1 king", "baseOccupancy": 2},
+    {"id": "rt-bamboo", "code": "BAMBO", "nameEn": "Bamboo Cottage", "nameBn": "বাঁশের কটেজ", "bedSummary": "2 twins", "baseOccupancy": 2},
+    {"id": "rt-clayhouse", "code": "CLAYH", "nameEn": "Clay House Suite", "nameBn": "মাটির ঘর স্যুট", "bedSummary": "1 king + sofa", "baseOccupancy": 3},
+    {"id": "rt-palmloft", "code": "PALML", "nameEn": "Palm Loft", "nameBn": "পাম লফট", "bedSummary": "1 queen", "baseOccupancy": 2},
+    {"id": "rt-earthlodge", "code": "EARTH", "nameEn": "Earth Lodge", "nameBn": "আর্থ লজ", "bedSummary": "2 queens", "baseOccupancy": 4}
+  ],
+  "units": [
+    {"id": "u-101", "number": "101", "roomTypeId": "rt-terracotta", "floor": "1", "occupancy": "VACANT", "housekeeping": "DIRTY", "housekeepingAt": "2026-11-16T06:10:00Z"},
+    {"id": "u-102", "number": "102", "roomTypeId": "rt-terracotta", "floor": "1", "occupancy": "OCCUPIED", "housekeeping": "DIRTY", "housekeepingAt": "2026-11-16T06:12:00Z"},
+    {"id": "u-103", "number": "103", "roomTypeId": "rt-terracotta", "floor": "1", "occupancy": "VACANT", "housekeeping": "CLEAN", "housekeepingAt": "2026-11-16T05:40:00Z"},
+    {"id": "u-104", "number": "104", "roomTypeId": "rt-terracotta", "floor": "1", "occupancy": "VACANT", "housekeeping": "INSPECTED", "housekeepingAt": "2026-11-16T05:20:00Z"},
+    {"id": "u-201", "number": "201", "roomTypeId": "rt-bamboo", "floor": "2", "occupancy": "VACANT", "housekeeping": "DIRTY", "housekeepingAt": "2026-11-16T06:30:00Z"},
+    {"id": "u-202", "number": "202", "roomTypeId": "rt-bamboo", "floor": "2", "occupancy": "OCCUPIED", "housekeeping": "DIRTY"},
+    {"id": "u-203", "number": "203", "roomTypeId": "rt-bamboo", "floor": "2", "occupancy": "VACANT", "housekeeping": "DIRTY", "housekeepingAt": "2026-11-16T06:31:00Z"},
+    {"id": "u-204", "number": "204", "roomTypeId": "rt-bamboo", "floor": "2", "occupancy": "VACANT", "housekeeping": "CLEAN", "housekeepingAt": "2026-11-16T05:50:00Z"},
+    {"id": "u-205", "number": "205", "roomTypeId": "rt-bamboo", "floor": "2", "occupancy": "OCCUPIED", "housekeeping": "CLEAN", "housekeepingAt": "2026-11-16T05:52:00Z"},
+    {"id": "u-206", "number": "206", "roomTypeId": "rt-bamboo", "floor": "2", "occupancy": "VACANT", "housekeeping": "INSPECTED", "housekeepingAt": "2026-11-16T05:10:00Z"},
+    {"id": "u-301", "number": "301", "roomTypeId": "rt-clayhouse", "floor": "3", "occupancy": "VACANT", "housekeeping": "DIRTY", "housekeepingAt": "2026-11-16T06:40:00Z"},
+    {"id": "u-302", "number": "302", "roomTypeId": "rt-clayhouse", "floor": "3", "occupancy": "VACANT", "housekeeping": "DIRTY", "housekeepingAt": "2026-11-16T06:41:00Z"},
+    {"id": "u-303", "number": "303", "roomTypeId": "rt-clayhouse", "floor": "3", "occupancy": "OCCUPIED", "housekeeping": "CLEAN", "housekeepingAt": "2026-11-16T05:55:00Z"},
+    {"id": "u-304", "number": "304", "roomTypeId": "rt-clayhouse", "floor": "3", "occupancy": "VACANT", "housekeeping": "INSPECTED", "housekeepingAt": "2026-11-16T05:05:00Z"},
+    {"id": "u-401", "number": "401", "roomTypeId": "rt-palmloft", "floor": "4", "occupancy": "VACANT", "housekeeping": "DIRTY", "housekeepingAt": "2026-11-16T06:50:00Z"},
+    {"id": "u-402", "number": "402", "roomTypeId": "rt-palmloft", "floor": "4", "occupancy": "VACANT", "housekeeping": "CLEAN", "housekeepingAt": "2026-11-16T05:58:00Z"},
+    {"id": "u-403", "number": "403", "roomTypeId": "rt-palmloft", "floor": "4", "occupancy": "OCCUPIED", "housekeeping": "INSPECTED", "housekeepingAt": "2026-11-16T05:00:00Z"},
+    {"id": "u-501", "number": "501", "roomTypeId": "rt-earthlodge", "floor": "5", "occupancy": "VACANT", "housekeeping": "DIRTY", "housekeepingAt": "2026-11-16T06:55:00Z"},
+    {"id": "u-502", "number": "502", "roomTypeId": "rt-earthlodge", "floor": "5", "occupancy": "VACANT", "housekeeping": "INSPECTED", "housekeepingAt": "2026-11-16T04:55:00Z"}
+  ],
+  "staff": [
+    {"name": "Ayesha", "role": "SUPERVISOR"},
+    {"name": "Karim", "role": "HOUSEKEEPER"},
+    {"name": "Mim", "role": "HOUSEKEEPER"},
+    {"name": "Rahim", "role": "HOUSEKEEPER"}
+  ],
+  "checklist": ["bed_linen", "towels_toiletries", "vacuum_mop", "bathroom_deep_clean", "minibar_restock", "ac_lights_sockets", "balcony_tidy", "final_walkthrough"]
+}

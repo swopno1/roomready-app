@@ -38,6 +38,13 @@ interface SyncQueueDao {
   )
   suspend fun markFailed(id: Long, attempts: Int, now: Long)
 
+  /** Parks a PMS-refused entry with the refusal reason; never retried. */
+  @Query(
+    "UPDATE sync_queue SET status = 'PARKED', lastError = :error, " +
+      "updatedAt = :now WHERE id = :id",
+  )
+  suspend fun park(id: Long, error: String, now: Long)
+
   @Query(
     "UPDATE sync_queue SET status = 'PENDING', dueAt = :now, updatedAt = :now " +
       "WHERE status = 'IN_FLIGHT' AND updatedAt < :cutoff",

@@ -67,9 +67,93 @@
     <string name="role_housekeeper">Housekeeper</string>
     <string name="role_supervisor">Supervisor</string>
 
+    <!-- Setup -->
+    <string name="setup_title">Connect to your PMS</string>
+    <string name="setup_subtitle">Enter the details from your property manager.</string>
+    <string name="setup_address_label">PMS address</string>
+    <string name="setup_address_hint">https://pms.example.com</string>
+    <string name="setup_key_label">Property API key</string>
+    <string name="setup_key_hint">rk.…</string>
+    <string name="setup_name_label">Staff name</string>
+    <string name="setup_name_hint">e.g. Ayesha</string>
+    <string name="setup_connect">Connect &amp; sync</string>
+    <string name="setup_scan_qr">Scan QR code</string>
+    <string name="setup_paste_code">or paste a pairing code</string>
+    <string name="setup_paste_title">Paste pairing code</string>
+    <string name="setup_paste_hint">roomready://connect?…</string>
+    <string name="setup_paste_apply">Apply</string>
+    <string name="setup_working">Connecting…</string>
+    <string name="setup_error_bad_address">That address doesn\'t look right. Check it starts with https:// and try again.</string>
+    <string name="setup_error_wrong_key">That API key was refused. Check the key with your property manager and try again.</string>
+    <string name="setup_error_server_down">Can\'t reach the PMS right now. Check your connection and try again — your offline work is safe.</string>
+    <string name="setup_error_contract">The PMS sent data this app version can\'t read. Please update RoomReady and try again.</string>
+    <string name="setup_error_blank_name">Enter your staff name.</string>
+    <string name="setup_error_bad_key_format">That key doesn\'t look like a property key (it starts with rk.…). Check it and try again.</string>
+
+    <!-- QR Pairing -->
+    <string name="qr_title">Scan pairing code</string>
+    <string name="qr_hint">Point the camera at the property QR code.</string>
+    <string name="qr_no_camera">No camera found on this device. Enter the details manually.</string>
+    <string name="qr_need_permission">Camera access is needed to scan. You can also enter the details manually.</string>
+    <string name="qr_grant">Allow camera</string>
+    <string name="qr_error_not_roomready">That\'s not a RoomReady pairing code.</string>
+    <string name="qr_error_version">This pairing code needs a newer RoomReady. Please update the app.</string>
+    <string name="qr_error_missing_field">This pairing code is incomplete.</string>
+    <string name="qr_error_bad_url">The address inside this code isn\'t valid.</string>
+    <string name="qr_error_bad_key">The key inside this code isn\'t valid.</string>
+
+    <!-- Sync Status -->
+    <string name="sync_last_synced">Last synced: %1$s</string>
+    <string name="sync_last_synced_label">Last synced</string>
+    <string name="sync_never">Not synced yet</string>
+    <plurals name="sync_pending">
+        <item quantity="one">%1$d waiting to sync</item>
+        <item quantity="other">%1$d waiting to sync</item>
+    </plurals>
+    <string name="sync_now">Sync now</string>
+    <string name="sync_working">Syncing…</string>
+
+    <!-- Home Board -->
+    <string name="home_today">Today\'s rooms</string>
+    <string name="home_no_rooms_title">No rooms from the PMS yet</string>
+    <string name="home_no_rooms_copy">Tap \'Sync now\' to fetch the latest board.</string>
+    <string name="rooms_row_cd">Room %1$s, %2$s</string>
+    <string name="occ_vacant">Vacant</string>
+    <string name="occ_occupied">Occupied</string>
+    <string name="occ_out_of_order">Out of order</string>
+    <string name="occ_unknown">Unknown</string>
+
+    <!-- Tickets -->
+    <string name="tickets_open_title">Open tickets</string>
+    <string name="tickets_none_after_sync">No open tickets. Nice work.</string>
+    <string name="tickets_row_cd">Ticket for room %1$s: %2$s</string>
+
+    <!-- Activity -->
+    <string name="activity_recent">Recent activity</string>
+    <string name="activity_parked_flag">Needs attention</string>
+    <string name="activity_empty_after_sync">Nothing logged yet. Actions you take offline appear here.</string>
+    <string name="activity_t_status_changed">Status change</string>
+    <string name="activity_t_checklist_completed">Checklist done</string>
+    <string name="activity_t_ticket_raised">Ticket raised</string>
+    <string name="activity_t_ticket_done">Ticket done</string>
+    <string name="activity_t_sent_back">Sent back</string>
+    <string name="activity_t_bootstrap_imported">Board updated</string>
+    <string name="activity_t_sync_completed">Sync sent %1$s</string>
+    <string name="activity_t_push_parked">Push parked</string>
+
+    <!-- Profile -->
+    <string name="profile_connected">Connected</string>
+    <string name="profile_property">Property</string>
+    <string name="profile_staff">Staff</string>
+    <string name="profile_key">API key</string>
+    <string name="profile_edit">Edit connection</string>
+
+    <!-- Common Actions -->
+    <string name="action_close">Close</string>
+    <string name="action_retry">Try again</string>
+
     <!-- Language & Feedback -->
     <string name="language_label">Language</string>
     <string name="language_english">English</string>
     <string name="language_bengali">বাংলা</string>
-    <string name="action_connect_prompt_feedback">PMS connection setup opens from Profile in the next step.</string>
 </resources>

@@ -16,4 +16,6 @@ data class RoomUnit(
   val occupancy: Occupancy,
   val hkState: HousekeepingState,
   val updatedAtEpochMillis: Long,
+  /** When the PMS last changed this unit's housekeeping state; null if unknown. */
+  val housekeepingAtEpochMillis: Long? = null,
 )

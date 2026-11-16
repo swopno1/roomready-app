@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity() {
       ) {
         RoomReadyTheme {
           RoomReadyApp(
+            graph = (application as RoomReadyApplication).graph,
             currentLanguageTag = selectedLanguageTag,
             onLanguageSelected = { tag -> selectedLanguageTag = tag },
           )

@@ -67,9 +67,93 @@
     <string name="role_housekeeper">হাউসকিপার</string>
     <string name="role_supervisor">সুপারভাইজার</string>
 
+    <!-- Setup -->
+    <string name="setup_title">পিএমএস-এ সংযুক্ত করুন</string>
+    <string name="setup_subtitle">আপনার প্রপার্টি ম্যানেজারের দেওয়া তথ্য দিন।</string>
+    <string name="setup_address_label">পিএমএস ঠিকানা</string>
+    <string name="setup_address_hint">https://pms.example.com</string>
+    <string name="setup_key_label">প্রপার্টি এপিআই কী</string>
+    <string name="setup_key_hint">rk.…</string>
+    <string name="setup_name_label">কর্মীর নাম</string>
+    <string name="setup_name_hint">যেমন: আয়েশা</string>
+    <string name="setup_connect">সংযুক্ত করুন ও সিঙ্ক করুন</string>
+    <string name="setup_scan_qr">কিউআর কোড স্ক্যান করুন</string>
+    <string name="setup_paste_code">অথবা পেয়ারিং কোড পেস্ট করুন</string>
+    <string name="setup_paste_title">পেয়ারিং কোড পেস্ট করুন</string>
+    <string name="setup_paste_hint">roomready://connect?…</string>
+    <string name="setup_paste_apply">প্রয়োগ করুন</string>
+    <string name="setup_working">সংযোগ করা হচ্ছে…</string>
+    <string name="setup_error_bad_address">ঠিকানাটি সঠিক মনে হচ্ছে না। এটি https:// দিয়ে শুরু হয়েছে কিনা দেখে আবার চেষ্টা করুন।</string>
+    <string name="setup_error_wrong_key">এই এপিআই কী গৃহীত হয়নি। প্রপার্টি ম্যানেজারের কাছ থেকে সঠিক কী নিয়ে আবার চেষ্টা করুন।</string>
+    <string name="setup_error_server_down">এই মুহূর্তে পিএমএস-এর সাথে যোগাযোগ করা যাচ্ছে না। সংযোগ দেখে আবার চেষ্টা করুন — আপনার অফলাইন কাজ নিরাপদে আছে।</string>
+    <string name="setup_error_contract">পিএমএস এমন তথ্য পাঠিয়েছে যা এই সংস্করণ পড়তে পারে না। RoomReady হালনাগাদ করে আবার চেষ্টা করুন।</string>
+    <string name="setup_error_blank_name">আপনার নাম লিখুন।</string>
+    <string name="setup_error_bad_key_format">এই কী-টি প্রপার্টি কী-এর মতো নয় (rk.… দিয়ে শুরু হয়)। যাচাই করে আবার চেষ্টা করুন।</string>
+
+    <!-- QR Pairing -->
+    <string name="qr_title">পেয়ারিং কোড স্ক্যান করুন</string>
+    <string name="qr_hint">ক্যামেরাটি প্রপার্টির কিউআর কোডের দিকে ধরুন।</string>
+    <string name="qr_no_camera">এই ডিভাইসে ক্যামেরা পাওয়া যায়নি। তথ্যগুলো হাতে লিখুন।</string>
+    <string name="qr_need_permission">স্ক্যান করতে ক্যামেরার অনুমতি দরকার। চাইলে তথ্যগুলো হাতেও লিখতে পারেন।</string>
+    <string name="qr_grant">ক্যামেরার অনুমতি দিন</string>
+    <string name="qr_error_not_roomready">এটি RoomReady পেয়ারিং কোড নয়।</string>
+    <string name="qr_error_version">এই পেয়ারিং কোডের জন্য নতুন RoomReady দরকার। অ্যাপ হালনাগাদ করুন।</string>
+    <string name="qr_error_missing_field">এই পেয়ারিং কোডটি অসম্পূর্ণ।</string>
+    <string name="qr_error_bad_url">কোডের ভেতরের ঠিকানাটি সঠিক নয়।</string>
+    <string name="qr_error_bad_key">কোডের ভেতরের কী-টি সঠিক নয়।</string>
+
+    <!-- Sync Status -->
+    <string name="sync_last_synced">সর্বশেষ সিঙ্ক: %1$s</string>
+    <string name="sync_last_synced_label">সর্বশেষ সিঙ্ক</string>
+    <string name="sync_never">এখনো সিঙ্ক হয়নি</string>
+    <plurals name="sync_pending">
+        <item quantity="one">%1$dটি সিঙ্কের অপেক্ষায়</item>
+        <item quantity="other">%1$dটি সিঙ্কের অপেক্ষায়</item>
+    </plurals>
+    <string name="sync_now">এখনই সিঙ্ক করুন</string>
+    <string name="sync_working">সিঙ্ক হচ্ছে…</string>
+
+    <!-- Home Board -->
+    <string name="home_today">আজকের রুম</string>
+    <string name="home_no_rooms_title">পিএমএস থেকে এখনো কোনো রুম আসেনি</string>
+    <string name="home_no_rooms_copy">সর্বশেষ বোর্ড পেতে \'এখনই সিঙ্ক করুন\' চাপুন।</string>
+    <string name="rooms_row_cd">রুম %1$s, %2$s</string>
+    <string name="occ_vacant">খালি</string>
+    <string name="occ_occupied">অতিথি আছে</string>
+    <string name="occ_out_of_order">বন্ধ আছে</string>
+    <string name="occ_unknown">অজানা</string>
+
+    <!-- Tickets -->
+    <string name="tickets_open_title">খোলা টিকিট</string>
+    <string name="tickets_none_after_sync">কোনো খোলা টিকিট নেই। চমৎকার কাজ।</string>
+    <string name="tickets_row_cd">রুম %1$s-এর টিকিট: %2$s</string>
+
+    <!-- Activity -->
+    <string name="activity_recent">সাম্প্রতিক কার্যক্রম</string>
+    <string name="activity_parked_flag">নজর দিন</string>
+    <string name="activity_empty_after_sync">এখনো কিছু লেখা হয়নি। অফলাইনে নেওয়া পদক্ষেপ এখানে দেখা যাবে।</string>
+    <string name="activity_t_status_changed">অবস্থা পরিবর্তন</string>
+    <string name="activity_t_checklist_completed">চেকলিস্ট সম্পন্ন</string>
+    <string name="activity_t_ticket_raised">টিকিট খোলা হয়েছে</string>
+    <string name="activity_t_ticket_done">টিকিট সম্পন্ন</string>
+    <string name="activity_t_sent_back">ফেরত পাঠানো হয়েছে</string>
+    <string name="activity_t_bootstrap_imported">বোর্ড হালনাগাদ</string>
+    <string name="activity_t_sync_completed">সিঙ্কে পাঠানো হয়েছে %1$s</string>
+    <string name="activity_t_push_parked">পাঠানো আটকে আছে</string>
+
+    <!-- Profile -->
+    <string name="profile_connected">সংযুক্ত</string>
+    <string name="profile_property">প্রপার্টি</string>
+    <string name="profile_staff">কর্মী</string>
+    <string name="profile_key">এপিআই কী</string>
+    <string name="profile_edit">সংযোগ সম্পাদনা করুন</string>
+
+    <!-- Common Actions -->
+    <string name="action_close">বন্ধ করুন</string>
+    <string name="action_retry">আবার চেষ্টা করুন</string>
+
     <!-- Language & Feedback -->
     <string name="language_label">ভাষা</string>
     <string name="language_english">English</string>
     <string name="language_bengali">বাংলা</string>
-    <string name="action_connect_prompt_feedback">পরবর্তী ধাপে প্রোফাইল থেকে পিএমএস সংযোগ সেটআপ চালু হবে।</string>
 </resources>

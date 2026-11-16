@@ -9,6 +9,8 @@ enum class ActivityType {
   SENT_BACK,
   BOOTSTRAP_IMPORTED,
   SYNC_COMPLETED,
+  /** An outbound push was refused by the PMS and parked (needs staff attention). */
+  PUSH_PARKED,
 }
 
 /** One immutable activity-log entry. */
