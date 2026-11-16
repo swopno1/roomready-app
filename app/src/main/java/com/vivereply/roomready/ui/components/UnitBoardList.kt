@@ -1,29 +1,20 @@
 package com.vivereply.roomready.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import com.vivereply.roomready.R
 import com.vivereply.roomready.domain.model.HousekeepingState
 import com.vivereply.roomready.domain.model.Occupancy
-import com.vivereply.roomready.domain.model.RoomUnit
 import com.vivereply.roomready.ui.theme.RoomReadyThemeTokens
 
-/** Semantic status chip; colours never change with branding. */
+/** Semantic status chip; colours never change with branding. Cross-fades on change. */
 @Composable
 fun StatusChip(state: HousekeepingState, modifier: Modifier = Modifier) {
   val colors = RoomReadyThemeTokens.colors
@@ -37,13 +28,15 @@ fun StatusChip(state: HousekeepingState, modifier: Modifier = Modifier) {
         HousekeepingState.READY -> R.string.status_ready
       },
     )
-  val (container, content) =
+  val (containerTarget, contentTarget) =
     when (state) {
       HousekeepingState.DIRTY -> colors.statusDirtyContainer to colors.onStatusDirtyContainer
       HousekeepingState.CLEANING -> colors.statusCleaningContainer to colors.onStatusCleaningContainer
       HousekeepingState.CLEANED -> colors.statusCleanedContainer to colors.onStatusCleanedContainer
       HousekeepingState.READY -> colors.statusReadyContainer to colors.onStatusReadyContainer
     }
+  val container by androidx.compose.animation.animateColorAsState(containerTarget, label = "chipBg")
+  val content by androidx.compose.animation.animateColorAsState(contentTarget, label = "chipFg")
   Surface(
     modifier = modifier,
     shape = RoundedCornerShape(radius.pill),
@@ -69,56 +62,3 @@ fun occupancyLabel(occupancy: Occupancy): String =
     },
   )
 
-/** Board list of room units shared by Home and Rooms. */
-@Composable
-fun UnitBoardList(
-  units: List<RoomUnit>,
-  typeNames: Map<String, String>,
-  modifier: Modifier = Modifier,
-) {
-  val colors = RoomReadyThemeTokens.colors
-  val spacing = RoomReadyThemeTokens.spacing
-  val radius = RoomReadyThemeTokens.radius
-  LazyColumn(
-    modifier = modifier.fillMaxWidth(),
-    verticalArrangement = Arrangement.spacedBy(spacing.sm),
-  ) {
-    items(units, key = { it.id }) { unit ->
-      val typeName = typeNames[unit.roomTypeId] ?: unit.roomTypeId
-      val statusText =
-        when (unit.hkState) {
-          HousekeepingState.DIRTY -> stringResource(R.string.status_dirty)
-          HousekeepingState.CLEANING -> stringResource(R.string.status_cleaning)
-          HousekeepingState.CLEANED -> stringResource(R.string.status_cleaned)
-          HousekeepingState.READY -> stringResource(R.string.status_ready)
-        }
-      val rowCd = stringResource(R.string.rooms_row_cd, unit.number, statusText)
-      Surface(
-        modifier = Modifier.fillMaxWidth().semantics { contentDescription = rowCd },
-        shape = RoundedCornerShape(radius.md),
-        color = colors.surface,
-        shadowElevation = RoomReadyThemeTokens.elevation.card,
-      ) {
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(spacing.md),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-          Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.xxs)) {
-            Text(
-              text = unit.number,
-              style = MaterialTheme.typography.titleLarge,
-              color = colors.ink,
-            )
-            Text(
-              text = "$typeName • ${occupancyLabel(unit.occupancy)}",
-              style = MaterialTheme.typography.bodyMedium,
-              color = colors.inkSecondary,
-            )
-          }
-          StatusChip(state = unit.hkState)
-        }
-      }
-    }
-  }
-}

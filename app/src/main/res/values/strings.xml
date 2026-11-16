@@ -114,7 +114,21 @@
     <string name="sync_working">Syncing…</string>
 
     <!-- Home Board -->
-    <string name="home_today">Today\'s rooms</string>
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
+    <plurals name="home_ready_progress">
+        <item quantity="one">%1$d of %2$d room ready</item>
+        <item quantity="other">%1$d of %2$d rooms ready</item>
+    </plurals>
+    <string name="home_needs_attention">Needs attention</string>
+    <string name="home_all_caught_up_title">All caught up</string>
+    <string name="home_all_caught_up_copy">No dirty rooms right now. Nice work.</string>
+    <string name="sync_state_synced">Synced</string>
+    <string name="sync_state_offline">Offline</string>
+    <string name="time_minutes">%1$dm</string>
+    <string name="time_hours">%1$dh</string>
+    <string name="time_days">%1$dd</string>
     <string name="home_no_rooms_title">No rooms from the PMS yet</string>
     <string name="home_no_rooms_copy">Tap \'Sync now\' to fetch the latest board.</string>
     <string name="rooms_row_cd">Room %1$s, %2$s</string>
@@ -122,6 +136,26 @@
     <string name="occ_occupied">Occupied</string>
     <string name="occ_out_of_order">Out of order</string>
     <string name="occ_unknown">Unknown</string>
+
+    <!-- Rooms Board -->
+    <string name="filter_all">All</string>
+    <string name="rooms_all_caught_up_title">All caught up</string>
+    <string name="rooms_all_caught_up_copy">Nothing in this state right now.</string>
+    <string name="rooms_load_error">Couldn\'t load the board.</string>
+    <plurals name="rooms_type_count">
+        <item quantity="one">%1$d room</item>
+        <item quantity="other">%1$d rooms</item>
+    </plurals>
+    <string name="action_start_cleaning">Start cleaning</string>
+    <string name="action_finish">Finish</string>
+    <string name="action_inspect">Inspect</string>
+    <string name="action_send_back">Send back</string>
+    <string name="action_err_checklist">Finish all 8 checklist steps first.</string>
+    <string name="action_err_not_allowed">Your role can\'t do that here.</string>
+    <string name="action_err_failed">That didn\'t go through. Try again.</string>
+    <string name="sendback_title">Send back to Dirty</string>
+    <string name="sendback_hint">Reason for the housekeeper</string>
+    <string name="sendback_confirm">Send back</string>
 
     <!-- Tickets -->
     <string name="tickets_open_title">Open tickets</string>

@@ -120,7 +120,17 @@ class ExampleRobolectricTest {
         R.string.sync_never,
         R.string.sync_now,
         R.string.sync_working,
-        R.string.home_today,
+        R.string.greeting_morning,
+        R.string.greeting_afternoon,
+        R.string.greeting_evening,
+        R.string.home_needs_attention,
+        R.string.home_all_caught_up_title,
+        R.string.home_all_caught_up_copy,
+        R.string.sync_state_synced,
+        R.string.sync_state_offline,
+        R.string.time_minutes,
+        R.string.time_hours,
+        R.string.time_days,
         R.string.home_no_rooms_title,
         R.string.home_no_rooms_copy,
         R.string.rooms_row_cd,
@@ -128,6 +138,20 @@ class ExampleRobolectricTest {
         R.string.occ_occupied,
         R.string.occ_out_of_order,
         R.string.occ_unknown,
+        R.string.filter_all,
+        R.string.rooms_all_caught_up_title,
+        R.string.rooms_all_caught_up_copy,
+        R.string.rooms_load_error,
+        R.string.action_start_cleaning,
+        R.string.action_finish,
+        R.string.action_inspect,
+        R.string.action_send_back,
+        R.string.action_err_checklist,
+        R.string.action_err_not_allowed,
+        R.string.action_err_failed,
+        R.string.sendback_title,
+        R.string.sendback_hint,
+        R.string.sendback_confirm,
         R.string.tickets_open_title,
         R.string.tickets_none_after_sync,
         R.string.tickets_row_cd,
@@ -164,6 +188,19 @@ class ExampleRobolectricTest {
     assertTrue(
       bnContext.resources.getQuantityString(R.plurals.sync_pending, 5, 5)
         .contains("সিঙ্কের অপেক্ষায়"),
+    )
+    assertTrue(
+      enContext.resources.getQuantityString(R.plurals.rooms_type_count, 1, 1).contains("1 room"),
+    )
+    assertTrue(
+      bnContext.resources.getQuantityString(R.plurals.rooms_type_count, 4, 4).contains("রুম"),
+    )
+    assertTrue(
+      enContext.resources.getQuantityString(R.plurals.home_ready_progress, 5, 2, 5)
+        .contains("2 of 5 rooms ready"),
+    )
+    assertTrue(
+      bnContext.resources.getQuantityString(R.plurals.home_ready_progress, 5, 2, 5).contains("প্রস্তুত"),
     )
 
     assertNotEquals(

@@ -3,18 +3,23 @@ package com.vivereply.roomready.ui
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import com.vivereply.roomready.data.pms.PmsError
 import com.vivereply.roomready.domain.model.ActivityEvent
 import com.vivereply.roomready.domain.model.ActivityType
 import com.vivereply.roomready.domain.model.HousekeepingState
 import com.vivereply.roomready.domain.model.Occupancy
+import com.vivereply.roomready.domain.model.RoomType
 import com.vivereply.roomready.domain.model.RoomUnit
+import com.vivereply.roomready.domain.model.StaffRole
 import com.vivereply.roomready.ui.screens.ActivityScreen
-import com.vivereply.roomready.ui.screens.HomeBoardScreen
+import com.vivereply.roomready.ui.screens.HomeDashboardScreen
+import com.vivereply.roomready.ui.screens.HomeDashboardUiState
 import com.vivereply.roomready.ui.screens.SetupFormState
 import com.vivereply.roomready.ui.screens.SetupScreen
 import com.vivereply.roomready.ui.state.SyncStatusUi
@@ -36,50 +41,78 @@ class ConnectedScreensTest {
   fun `home shows last synced timestamp and pending count`() {
     compose.setContent {
       RoomReadyTheme {
-        HomeBoardScreen(
-          status =
-            SyncStatusUi(
-              connected = true,
-              lastSyncedAt = 1_794_729_600_000L,
-              pendingCount = 3,
-              syncing = false,
-              error = null,
+        HomeDashboardScreen(
+          state =
+            HomeDashboardUiState(
+              status =
+                SyncStatusUi(
+                  connected = true,
+                  lastSyncedAt = 1_794_729_600_000L,
+                  pendingCount = 3,
+                  syncing = false,
+                  error = null,
+                ),
+              staffName = "Ayesha",
+              hourOfDay = 9,
+              units =
+                listOf(
+                  RoomUnit("u-101", "101", "rt-t", "1", Occupancy.VACANT, HousekeepingState.DIRTY, 1L),
+                  RoomUnit("u-102", "102", "rt-t", "1", Occupancy.OCCUPIED, HousekeepingState.READY, 1L),
+                ),
+              types = mapOf("rt-t" to RoomType("rt-t", "TERRA", "Terracotta Villa", "টেরাকোটা ভিলা", "1 king", 2)),
+              role = StaffRole.HOUSEKEEPER,
+              nowEpochMillis = 3_661_000L,
             ),
-          units =
-            listOf(
-              RoomUnit("u-101", "101", "rt-t", "1", Occupancy.VACANT, HousekeepingState.DIRTY, 1L),
-              RoomUnit("u-102", "102", "rt-t", "1", Occupancy.OCCUPIED, HousekeepingState.READY, 1L),
-            ),
-          typeNames = mapOf("rt-t" to "Terracotta Villa"),
           languageTag = "en",
           onSyncNow = {},
+          onFilterSelected = {},
+          onAction = { _, _ -> },
+          onSendBack = {},
         )
       }
     }
-    compose.onNodeWithTag("home_last_synced").assertIsDisplayed()
-      .assertTextContains("Last synced:", substring = true)
-    compose.onNodeWithTag("home_pending").assertIsDisplayed()
-      .assertTextContains("3 waiting to sync")
-    compose.onNodeWithTag("home_counts").assertIsDisplayed()
-    compose.onAllNodesWithText("Terracotta Villa", substring = true)[0].performScrollTo()
-      .assertIsDisplayed()
+    compose.onNodeWithTag("home_greeting").assertIsDisplayed().assertTextContains("Ayesha")
+    compose.onNodeWithTag("home_hero").assertIsDisplayed()
+    compose.onNodeWithTag("home_chip_dirty").assertIsDisplayed()
+    scrollHomeTo("home_last_synced")
+    compose.onNodeWithTag("home_last_synced").assertTextContains("Last synced:", substring = true)
+    scrollHomeTo("home_pending")
+    compose.onNodeWithTag("home_pending").assertTextContains("3 waiting to sync")
+    scrollHomeTo("home_sync_pill")
+    scrollHomeTo("unit_card_u-101")
+    compose.onAllNodesWithText("Terracotta Villa", substring = true)[0].assertIsDisplayed()
+  }
+
+  private fun scrollHomeTo(tag: String) {
+    compose.onNodeWithTag("home_list").performScrollToNode(hasTestTag(tag))
+    compose.onNodeWithTag(tag).assertIsDisplayed()
   }
 
   @Test
   fun `home shows never-synced state honestly`() {
     compose.setContent {
       RoomReadyTheme {
-        HomeBoardScreen(
-          status = SyncStatusUi(true, null, 0, false, null),
-          units = emptyList(),
-          typeNames = emptyMap(),
+        HomeDashboardScreen(
+          state =
+            HomeDashboardUiState(
+              status = SyncStatusUi(true, null, 0, false, null),
+              staffName = null,
+              hourOfDay = 20,
+              units = emptyList(),
+              types = emptyMap(),
+              role = null,
+            ),
           languageTag = "en",
           onSyncNow = {},
+          onFilterSelected = {},
+          onAction = { _, _ -> },
+          onSendBack = {},
         )
       }
     }
-    compose.onNodeWithText("Not synced yet").assertIsDisplayed()
     compose.onNodeWithText("No rooms from the PMS yet").assertIsDisplayed()
+    scrollHomeTo("home_last_synced")
+    compose.onNodeWithText("Not synced yet").assertIsDisplayed()
   }
 
   @Test

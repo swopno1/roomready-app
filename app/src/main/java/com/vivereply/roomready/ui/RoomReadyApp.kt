@@ -267,7 +267,15 @@ fun RoomReadyApp(
         ) {
           composable(RoomReadyDestination.Home.route) {
             if (connected.connected) {
-              HomeRoute(connection = connection, board = board, languageTag = currentLanguageTag)
+              HomeRoute(
+                connection = connection,
+                board = board,
+                languageTag = currentLanguageTag,
+                onFilterSelected = { filter ->
+                  board.setFilter(filter)
+                  navigateToTab(RoomReadyDestination.Rooms)
+                },
+              )
             } else {
               TabEmptyStateScreen(
                 destination = RoomReadyDestination.Home,
@@ -279,7 +287,7 @@ fun RoomReadyApp(
           }
           composable(RoomReadyDestination.Rooms.route) {
             if (connected.connected) {
-              RoomsRoute(board = board)
+              RoomsRoute(board = board, connection = connection, languageTag = currentLanguageTag)
             } else {
               TabEmptyStateScreen(
                 destination = RoomReadyDestination.Rooms,
@@ -336,7 +344,7 @@ fun RoomReadyApp(
               viewModel = setup,
               onConnected = {
                 connection.refresh()
-                board.refreshTypes()
+                board.refresh()
                 navController.popBackStack()
                 navigateToTab(RoomReadyDestination.Home)
               },

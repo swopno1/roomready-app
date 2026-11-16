@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,22 +26,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vivereply.roomready.R
 import com.vivereply.roomready.domain.model.Ticket
-import com.vivereply.roomready.ui.components.UnitBoardList
-import com.vivereply.roomready.ui.state.BoardViewModel
 import com.vivereply.roomready.ui.state.TicketsViewModel
 import com.vivereply.roomready.ui.theme.RoomReadyThemeTokens
-
-@Composable
-fun RoomsRoute(board: BoardViewModel, modifier: Modifier = Modifier) {
-  val units by board.units.collectAsStateWithLifecycle()
-  val typeNames by board.typeNames.collectAsStateWithLifecycle()
-  LaunchedEffect(Unit) { board.refreshTypes() }
-  val colors = RoomReadyThemeTokens.colors
-  val spacing = RoomReadyThemeTokens.spacing
-  Column(modifier = modifier.fillMaxSize().background(colors.canvas).padding(spacing.md)) {
-    UnitBoardList(units = units, typeNames = typeNames, modifier = Modifier.weight(1f))
-  }
-}
 
 @Composable
 fun TicketsRoute(viewModel: TicketsViewModel, modifier: Modifier = Modifier) {

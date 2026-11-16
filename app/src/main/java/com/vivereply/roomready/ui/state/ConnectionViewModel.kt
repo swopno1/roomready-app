@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.vivereply.roomready.data.pms.PmsError
 import com.vivereply.roomready.data.pms.PmsException
 import com.vivereply.roomready.data.pms.SyncOrchestrator
+import com.vivereply.roomready.domain.model.StaffRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +34,12 @@ class ConnectionViewModel(private val orchestrator: SyncOrchestrator) : ViewMode
     )
   val status: StateFlow<SyncStatusUi> = _status.asStateFlow()
 
+  private val _role = MutableStateFlow<StaffRole?>(null)
+  val role: StateFlow<StaffRole?> = _role.asStateFlow()
+
+  private val _staffName = MutableStateFlow<String?>(null)
+  val staffName: StateFlow<String?> = _staffName.asStateFlow()
+
   init {
     refresh()
   }
@@ -45,6 +52,8 @@ class ConnectionViewModel(private val orchestrator: SyncOrchestrator) : ViewMode
           lastSyncedAt = orchestrator.lastSyncedAt(),
           pendingCount = orchestrator.pendingCount(),
         )
+      _role.value = runCatching { orchestrator.staffIdentity()?.role }.getOrNull()
+      _staffName.value = runCatching { orchestrator.staffIdentity()?.name }.getOrNull()
     }
   }
 

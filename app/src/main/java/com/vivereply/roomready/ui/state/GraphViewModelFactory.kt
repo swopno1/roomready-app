@@ -14,7 +14,7 @@ class GraphViewModelFactory(private val graph: EngineGraph) : ViewModelProvider.
       modelClass.isAssignableFrom(SetupViewModel::class.java) ->
         SetupViewModel(graph.orchestrator) as T
       modelClass.isAssignableFrom(BoardViewModel::class.java) ->
-        BoardViewModel(graph.rooms) as T
+        BoardViewModel(graph.rooms, graph.orchestrator) as T
       modelClass.isAssignableFrom(ActivityFeedViewModel::class.java) ->
         ActivityFeedViewModel(graph.activity) as T
       modelClass.isAssignableFrom(TicketsViewModel::class.java) ->

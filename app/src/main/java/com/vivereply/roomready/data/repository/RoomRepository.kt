@@ -213,7 +213,9 @@ class RoomRepository(
    * Occupancy and PMS-known fields always come from the import. Local hk
    * state is preserved when it still maps to the same PMS code (notably
    * CLEANING, which the PMS reports as DIRTY) or when unsynced local
-   * mutations exist for the unit; otherwise the PMS state wins.
+   * mutations exist for the unit; otherwise the PMS state wins. When local
+   * state is preserved, its entry timestamps are kept too, so a re-import
+   * never rewinds the time-in-state clock.
    */
   suspend fun importBootstrap(
     roomTypes: List<RoomType>,
@@ -232,11 +234,17 @@ class RoomRepository(
         PmsHousekeeping.fromLocal(existing.hkState) == PmsHousekeeping.fromLocal(incoming.hkState) ||
           queue.unsyncedCountFor(SyncEntityType.UNIT_STATUS, incoming.id) > 0
       if (keepLocal) preserved++
-      units.upsert(
-        RoomUnitEntity.fromDomain(
-          incoming.copy(hkState = if (keepLocal) existing.hkState else incoming.hkState),
-        ),
-      )
+      val merged =
+        if (keepLocal) {
+          incoming.copy(
+            hkState = existing.hkState,
+            updatedAtEpochMillis = existing.updatedAt,
+            housekeepingAtEpochMillis = existing.housekeepingAt,
+          )
+        } else {
+          incoming
+        }
+      units.upsert(RoomUnitEntity.fromDomain(merged))
     }
     val now = clock.nowEpochMillis()
     activity.insert(

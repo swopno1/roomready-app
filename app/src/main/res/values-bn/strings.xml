@@ -114,7 +114,21 @@
     <string name="sync_working">সিঙ্ক হচ্ছে…</string>
 
     <!-- Home Board -->
-    <string name="home_today">আজকের রুম</string>
+    <string name="greeting_morning">শুভ সকাল</string>
+    <string name="greeting_afternoon">শুভ অপরাহ্ন</string>
+    <string name="greeting_evening">শুভ সন্ধ্যা</string>
+    <plurals name="home_ready_progress">
+        <item quantity="one">%1$dটির মধ্যে %2$dটি রুম প্রস্তুত</item>
+        <item quantity="other">%1$dটির মধ্যে %2$dটি রুম প্রস্তুত</item>
+    </plurals>
+    <string name="home_needs_attention">নজর দেওয়া দরকার</string>
+    <string name="home_all_caught_up_title">সব কাজ শেষ</string>
+    <string name="home_all_caught_up_copy">এখন কোনো নোংরা রুম নেই। চমৎকার কাজ।</string>
+    <string name="sync_state_synced">সিঙ্ক সম্পন্ন</string>
+    <string name="sync_state_offline">অফলাইন</string>
+    <string name="time_minutes">%1$d মি</string>
+    <string name="time_hours">%1$d ঘ</string>
+    <string name="time_days">%1$d দি</string>
     <string name="home_no_rooms_title">পিএমএস থেকে এখনো কোনো রুম আসেনি</string>
     <string name="home_no_rooms_copy">সর্বশেষ বোর্ড পেতে \'এখনই সিঙ্ক করুন\' চাপুন।</string>
     <string name="rooms_row_cd">রুম %1$s, %2$s</string>
@@ -122,6 +136,26 @@
     <string name="occ_occupied">অতিথি আছে</string>
     <string name="occ_out_of_order">বন্ধ আছে</string>
     <string name="occ_unknown">অজানা</string>
+
+    <!-- Rooms Board -->
+    <string name="filter_all">সব</string>
+    <string name="rooms_all_caught_up_title">সব কাজ শেষ</string>
+    <string name="rooms_all_caught_up_copy">এই অবস্থায় এখন কিছু নেই।</string>
+    <string name="rooms_load_error">বোর্ড লোড করা যায়নি।</string>
+    <plurals name="rooms_type_count">
+        <item quantity="one">%1$dটি রুম</item>
+        <item quantity="other">%1$dটি রুম</item>
+    </plurals>
+    <string name="action_start_cleaning">পরিষ্কার শুরু করুন</string>
+    <string name="action_finish">শেষ করুন</string>
+    <string name="action_inspect">পরিদর্শন করুন</string>
+    <string name="action_send_back">ফেরত পাঠান</string>
+    <string name="action_err_checklist">আগে চেকলিস্টের ৮টি ধাপ শেষ করুন।</string>
+    <string name="action_err_not_allowed">আপনার ভূমিকা থেকে এখানে এটি করা যাবে না।</string>
+    <string name="action_err_failed">এটি সম্পন্ন হয়নি। আবার চেষ্টা করুন।</string>
+    <string name="sendback_title">নোংরা অবস্থায় ফেরত পাঠান</string>
+    <string name="sendback_hint">হাউসকিপারের জন্য কারণ</string>
+    <string name="sendback_confirm">ফেরত পাঠান</string>
 
     <!-- Tickets -->
     <string name="tickets_open_title">খোলা টিকিট</string>

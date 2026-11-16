@@ -226,6 +226,8 @@ class OfflineEngineTest {
     runTest {
       seedUnit(id = "u-101", number = "101", hk = HousekeepingState.DIRTY)
       assertSuccess(rooms.startCleaning("u-101", housekeeper))
+      val enteredCleaningAt = rooms.getUnit("u-101")?.updatedAtEpochMillis
+      clock.advance(60_000L)
 
       val result =
         rooms.importBootstrap(
@@ -240,6 +242,7 @@ class OfflineEngineTest {
                 Occupancy.VACANT,
                 HousekeepingState.DIRTY,
                 999L,
+                housekeepingAtEpochMillis = 888L,
               ),
             ),
         )
@@ -247,6 +250,9 @@ class OfflineEngineTest {
       // Local CLEANING kept (PMS has no in-progress state), occupancy refreshed from PMS.
       assertEquals(HousekeepingState.CLEANING, rooms.getUnit("u-101")?.hkState)
       assertEquals(Occupancy.VACANT, rooms.getUnit("u-101")?.occupancy)
+      // State-entry timestamps kept: the import (updatedAt 999) must not rewind the clock.
+      assertEquals(enteredCleaningAt, rooms.getUnit("u-101")?.updatedAtEpochMillis)
+      assertEquals(null, rooms.getUnit("u-101")?.housekeepingAtEpochMillis)
     }
 
   @Test
