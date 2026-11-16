@@ -1,0 +1,8 @@
+{
+  "name": "RoomReady",
+  "description": "Offline-first resort housekeeping companion for room turnovers, tickets, and live PMS sync.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

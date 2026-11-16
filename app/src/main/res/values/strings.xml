@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">RoomReady</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_rooms">Rooms</string>
+    <string name="nav_tickets">Tickets</string>
+    <string name="nav_activity">Activity</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Brand & Header -->
+    <string name="status_offline_not_linked">Not linked</string>
+    <string name="brand_lockup_content_description">RoomReady logo</string>
+    <string name="brand_tagline">OFFLINE-FIRST HOUSEKEEPING</string>
+
+    <!-- Semantic Status Labels -->
+    <string name="status_dirty">Dirty</string>
+    <string name="status_cleaning">Cleaning</string>
+    <string name="status_cleaned">Cleaned</string>
+    <string name="status_ready">Ready</string>
+
+    <!-- Empty States -->
+    <string name="empty_home_title">No property connected</string>
+    <string name="empty_home_copy">Connect your PMS to load today\'s room turnover board.</string>
+    <string name="empty_home_action">Connect PMS</string>
+    <string name="empty_home_artwork_cd">Illustration of an open resort room door waiting for sync</string>
+
+    <string name="empty_rooms_title">Your room list is empty</string>
+    <string name="empty_rooms_copy">Link your property key to view live room and occupancy states.</string>
+    <string name="empty_rooms_action">Link Property</string>
+    <string name="empty_rooms_artwork_cd">Illustration of resort villa doors waiting for room units</string>
+
+    <string name="empty_tickets_title">No maintenance tickets</string>
+    <string name="empty_tickets_copy">Guest requests and repair tickets appear once your resort syncs.</string>
+    <string name="empty_tickets_action">Set Up Sync</string>
+    <string name="empty_tickets_artwork_cd">Illustration of a room door with a service tag</string>
+
+    <string name="empty_activity_title">No turnover activity yet</string>
+    <string name="empty_activity_copy">Completed checklists and sync history are logged here offline.</string>
+    <string name="empty_activity_action">Connect Account</string>
+    <string name="empty_activity_artwork_cd">Illustration of a room doorway and activity timeline</string>
+
+    <string name="empty_profile_title">Set up your housekeeper profile</string>
+    <string name="empty_profile_copy">Enter your PMS address, API key, and staff name to begin.</string>
+    <string name="empty_profile_action">Configure PMS</string>
+    <string name="empty_profile_artwork_cd">Illustration of a staff badge beside the Ready Door emblem</string>
+
+    <!-- Language & Feedback -->
+    <string name="language_label">Language</string>
+    <string name="language_english">English</string>
+    <string name="language_bengali">বাংলা</string>
+    <string name="action_connect_prompt_feedback">PMS connection setup opens from Profile in the next step.</string>
+</resources>

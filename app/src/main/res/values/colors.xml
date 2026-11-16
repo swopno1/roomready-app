@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="vivereply_ink">#FF0F172A</color>
+    <color name="mint_start">#FF00FF94</color>
+    <color name="mint_end">#FF00EEDA</color>
+    <color name="mint_solid">#FF00F1CE</color>
+    <color name="warm_canvas">#FFFAF8F4</color>
+    <color name="warm_surface">#FFFFFFFF</color>
+</resources>

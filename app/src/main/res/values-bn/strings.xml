@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">RoomReady</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">হোম</string>
+    <string name="nav_rooms">রুম</string>
+    <string name="nav_tickets">টিকিট</string>
+    <string name="nav_activity">কার্যকলাপ</string>
+    <string name="nav_profile">প্রোফাইল</string>
+
+    <!-- Brand & Header -->
+    <string name="status_offline_not_linked">সংযুক্ত নয়</string>
+    <string name="brand_lockup_content_description">RoomReady লোগো</string>
+    <string name="brand_tagline">অফলাইন-ফার্স্ট হাউসকিপিং</string>
+
+    <!-- Semantic Status Labels -->
+    <string name="status_dirty">নোংরা</string>
+    <string name="status_cleaning">পরিষ্কার চলছে</string>
+    <string name="status_cleaned">পরিষ্কার সম্পন্ন</string>
+    <string name="status_ready">প্রস্তুত</string>
+
+    <!-- Empty States -->
+    <string name="empty_home_title">কোনো রিসোর্ট সংযুক্ত নেই</string>
+    <string name="empty_home_copy">আজকের রুম টার্নওভার বোর্ড লোড করতে পিএমএস সংযুক্ত করুন।</string>
+    <string name="empty_home_action">পিএমএস সংযুক্ত করুন</string>
+    <string name="empty_home_artwork_cd">সিঙ্কের অপেক্ষায় খোলা রিসোর্ট রুমের দরজার চিত্র</string>
+
+    <string name="empty_rooms_title">আপনার রুম তালিকা খালি</string>
+    <string name="empty_rooms_copy">রুম ও অতিথির অবস্থা দেখতে প্রপার্টি কী যুক্ত করুন।</string>
+    <string name="empty_rooms_action">প্রপার্টি যুক্ত করুন</string>
+    <string name="empty_rooms_artwork_cd">রুম ইউনিটের অপেক্ষায় রিসোর্ট ভিলার দরজার চিত্র</string>
+
+    <string name="empty_tickets_title">কোনো রক্ষণাবেক্ষণ টিকিট নেই</string>
+    <string name="empty_tickets_copy">রিসোর্ট সিঙ্ক হলে অতিথি অনুরোধ ও মেরামতের টিকিট দেখা যাবে।</string>
+    <string name="empty_tickets_action">সিঙ্ক সেটআপ করুন</string>
+    <string name="empty_tickets_artwork_cd">সার্ভিস ট্যাগসহ রুমের দরজার চিত্র</string>
+
+    <string name="empty_activity_title">এখনো কোনো টার্নওভার কার্যক্রম নেই</string>
+    <string name="empty_activity_copy">সম্পন্ন চেকলিস্ট ও সিঙ্ক ইতিহাস এখানে অফলাইনে সংরক্ষিত হবে।</string>
+    <string name="empty_activity_action">অ্যাকাউন্ট সংযুক্ত করুন</string>
+    <string name="empty_activity_artwork_cd">রুমের দরজা ও কার্যক্রমের সময়রেখার চিত্র</string>
+
+    <string name="empty_profile_title">হাউসকিপার প্রোফাইল সেটআপ করুন</string>
+    <string name="empty_profile_copy">শুরু করতে পিএমএস ঠিকানা, এপিআই কী এবং আপনার নাম দিন।</string>
+    <string name="empty_profile_action">পিএমএস কনফিগার করুন</string>
+    <string name="empty_profile_artwork_cd">রেডি ডোর প্রতীকের পাশে কর্মী ব্যাজের চিত্র</string>
+
+    <!-- Language & Feedback -->
+    <string name="language_label">ভাষা</string>
+    <string name="language_english">English</string>
+    <string name="language_bengali">বাংলা</string>
+    <string name="action_connect_prompt_feedback">পরবর্তী ধাপে প্রোফাইল থেকে পিএমএস সংযোগ সেটআপ চালু হবে।</string>
+</resources>
