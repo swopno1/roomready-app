@@ -17,7 +17,8 @@ enum class Occupancy {
     fun fromCode(code: String?): Occupancy {
       if (code.isNullOrBlank()) return UNKNOWN
       return when (code.trim().uppercase()) {
-        "VACANT", "VAC" -> VACANT
+        // AVAILABLE is the live PMS synonym for a vacant unit (unitStatus).
+        "VACANT", "VAC", "AVAILABLE" -> VACANT
         "OCCUPIED", "OCC" -> OCCUPIED
         "OUT_OF_ORDER", "OOO", "OUT-OF-ORDER" -> OUT_OF_ORDER
         else -> UNKNOWN

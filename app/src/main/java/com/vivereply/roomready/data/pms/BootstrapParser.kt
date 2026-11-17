@@ -66,7 +66,10 @@ object BootstrapParser {
       val obj = array.optJSONObject(i) ?: continue
       val id = obj.optStringOrNull("id") ?: continue
       val code = obj.optStringOrNull("code") ?: id
-      val nameEn = obj.optStringOrNull("nameEn") ?: obj.optStringOrNull("name") ?: code
+      // Live PMS sends title ("Bamboo Cottage"); legacy sends nameEn/name.
+      val nameEn =
+        obj.optStringOrNull("nameEn") ?: obj.optStringOrNull("name")
+          ?: obj.optStringOrNull("title") ?: code
       out +=
         RoomType(
           id = id,
@@ -100,7 +103,8 @@ object BootstrapParser {
         warnings += BootstrapWarning.DanglingRoomType(id, roomTypeId)
       }
 
-      val occupancyRaw = obj.optStringOrNull("occupancy")
+      // Live PMS sends unitStatus (AVAILABLE/OCCUPIED); legacy sends occupancy.
+      val occupancyRaw = obj.optStringOrNull("unitStatus") ?: obj.optStringOrNull("occupancy")
       val occupancy = Occupancy.fromCode(occupancyRaw)
       if (!occupancyRaw.isNullOrBlank() && occupancy == Occupancy.UNKNOWN &&
         !occupancyRaw.equals("UNKNOWN", ignoreCase = true)
@@ -128,7 +132,8 @@ object BootstrapParser {
       out +=
         RoomUnit(
           id = id,
-          number = obj.optStringOrNull("number") ?: id,
+          // Live PMS sends unitNumber ("BC-1"); legacy sends number.
+          number = obj.optStringOrNull("unitNumber") ?: obj.optStringOrNull("number") ?: id,
           roomTypeId = roomTypeId,
           floor = obj.optStringOrNull("floor"),
           occupancy = occupancy,

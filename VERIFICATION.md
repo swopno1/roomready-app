@@ -14,8 +14,9 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@21 ANDROID_HOME=$HOME/Library/Android/sdk \
   sh gradlew :app:lintDebug
 ```
 
-Latest green: **294 tests, 0 failures** · **lint 0 errors / 45 warnings**
-(warning count unchanged since R3.1; none in R7–R9 code).
+Latest green: **298 tests, 0 failures** · **lint 0 errors / 46 warnings**
+(45 since R3.1 plus one VectorRaster note on the new animated splash base —
+288dp is the platform splash spec, same as the pre-existing splash mark).
 
 ## 1. Automated verification matrix
 
@@ -26,7 +27,7 @@ Latest green: **294 tests, 0 failures** · **lint 0 errors / 45 warnings**
 | Ticket lifecycle | `domain/TicketLifecycleTest` (4), `ui/TicketsInspectTest` (9), `data/pms/ServerTicketsTest` (5), `data/pms/TicketServerIdsTest` (2), `data/pms/TicketTitlesTest` (4) | Raise (room, category, note, photo ref) → open → done; one-tap done; server-id remap (PATCH uses the server id, never the local id); retired categories degrade to Other; reconcile is one-way OPEN→DONE with doneBy/doneAt preserved |
 | Dashboard counts | `ui/ConnectedScreensTest` (4), `ui/ShowcaseScreensTest` (7), `ui/state/BoardActionsTest` (7) | 19 replay units grouped by type (4/6/4/3/2); hero progress X-of-Y; needs-attention ordering (Dirty longest-waiting first); honest sync pill; role-correct primary actions |
 | Sync merge matrix | `data/OfflineEngineTest` (19), `data/sync/SyncParkTest` (9), `data/pms/SyncOrchestratorTest` (12), `data/pms/PmsOutboundTransportTest` (14), `data/pms/OutboundMapperTest` (13), `data/SyncRetryPolicyTest` (6), `data/SyncPayloadsTest` (8) | Queue ordering + retry order; poison entries park without blocking the drain; bootstrap preserves local state on code match or unsynced mutations; 401 stops the drain and wipes only the key; 403/404/422 park + flag; 409 parks + schedules a refresh (never blind-retried); legacy R3 entries translate or park visibly; exact wire shape per op (method, path, body field-for-field, no `actor` anywhere, `note` omitted when blank, `priority: "NORMAL"`) |
-| Parser tolerance | `data/pms/BootstrapParserTest` (12), `data/pms/LenientTimestampsTest` (5), `data/pms/BootstrapReplayTest` (1) | Missing/unparseable `housekeepingAt` degrades to null, never fails; unknown enums degrade to safe defaults with local warnings; malformed units/staff skipped, never fatal; contract mismatch fails typed; replay proof ends at 5 types / 19 units from `bootstrap_replay.json` (test fixture only, never shipped) |
+| Parser tolerance | `data/pms/BootstrapParserTest` (12), `data/pms/LenientTimestampsTest` (5), `data/pms/BootstrapReplayTest` (1), `data/pms/BootstrapLiveShapeTest` (4) | Missing/unparseable `housekeepingAt` degrades to null, never fails; unknown enums degrade to safe defaults with local warnings; malformed units/staff skipped, never fatal; contract mismatch fails typed; live demo13 shape (`unitNumber`, `unitStatus`, type `title`, absent staff/checklist) parses to friendly names with legacy-key fallbacks; replay proof ends at 5 types / 19 units from `bootstrap_replay.json` (test fixture only, never shipped) |
 | Language completeness | `ExampleRobolectricTest` parity (3), `ui/BengaliTabsTest` (16), `notifications/NotificationStringsTest` (4) | 209 keys (200 strings + 9 plurals) with full EN+BN parity incl. format-arg match; every tab, setup, detail, inspect, ticket form, all 5 empty states, and both camera rationales render in Bengali (a missing string would crash the render) |
 | Airplane silence | `data/OfflineEngineTest` airplane test | Every local action (start, steps, finish, inspect, tickets) runs with zero transport calls — local actions take no transport parameter, so network is structurally impossible |
 | Offline proof UI | `ui/ActivityProfileTest` (7), `ui/state/SummarizeTodayTest` (4) | Sync log (last synced, pending, parked reasons), today's offline work counts, profile disconnect confirm flow |
