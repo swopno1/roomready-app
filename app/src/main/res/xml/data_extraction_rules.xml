@@ -6,6 +6,7 @@
         <!-- Local photo files and refs are meaningless on restore. -->
         <exclude domain="sharedpref" path="roomready_photos.xml" />
         <exclude domain="file" path="cleaning_photos/" />
+        <exclude domain="file" path="ticket_photos/" />
     </cloud-backup>
     <device-transfer>
         <!-- Secrets must never leave the device via transfer. -->
@@ -13,5 +14,6 @@
         <!-- Local photo files and refs are meaningless on restore. -->
         <exclude domain="sharedpref" path="roomready_photos.xml" />
         <exclude domain="file" path="cleaning_photos/" />
+        <exclude domain="file" path="ticket_photos/" />
     </device-transfer>
 </data-extraction-rules>

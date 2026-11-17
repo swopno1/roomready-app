@@ -15,4 +15,11 @@ interface ActivityDao {
 
   @Query("SELECT * FROM activity_log ORDER BY createdAt DESC, id DESC LIMIT :limit")
   fun observeRecent(limit: Int): Flow<List<ActivityEntity>>
+
+  /** Latest supervisor send-back for one unit, so the redo shows its reason. */
+  @Query(
+    "SELECT * FROM activity_log WHERE type = 'SENT_BACK' AND unitId = :unitId " +
+      "ORDER BY createdAt DESC, id DESC LIMIT 1",
+  )
+  suspend fun lastSentBack(unitId: String): ActivityEntity?
 }

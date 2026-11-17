@@ -58,8 +58,7 @@
     <!-- Ticket Categories -->
     <string name="ticket_category_plumbing">Plumbing</string>
     <string name="ticket_category_electrical">Electrical</string>
-    <string name="ticket_category_linen">Linen</string>
-    <string name="ticket_category_minibar">Minibar</string>
+    <string name="ticket_category_ac">AC</string>
     <string name="ticket_category_furniture">Furniture</string>
     <string name="ticket_category_other">Other</string>
 
@@ -192,6 +191,25 @@
     <string name="tickets_open_title">Open tickets</string>
     <string name="tickets_none_after_sync">No open tickets. Nice work.</string>
     <string name="tickets_row_cd">Ticket for room %1$s: %2$s</string>
+    <string name="ticket_new_title">New ticket</string>
+    <string name="ticket_room">Room</string>
+    <string name="ticket_pick_room">Choose a room</string>
+    <string name="ticket_note_label">What\'s wrong?</string>
+    <string name="ticket_note_hint">Describe the issue</string>
+    <string name="ticket_add_photo">Add photo</string>
+    <string name="ticket_raise">Raise ticket</string>
+    <string name="ticket_status_open">Open</string>
+    <string name="ticket_status_done">Done</string>
+    <string name="ticket_age">%1$s old</string>
+    <string name="ticket_mark_done">Done</string>
+    <string name="ticket_photo_hint">Take a photo of the issue</string>
+    <string name="ticket_photo_error">Couldn\'t save the photo. Try again.</string>
+
+    <!-- Inspection -->
+    <string name="inspect_title">Inspect room %1$s</string>
+    <string name="inspect_checklist">Completed checklist</string>
+    <string name="inspect_pass">Pass</string>
+    <string name="detail_sent_back">Sent back: %1$s</string>
 
     <!-- Activity -->
     <string name="activity_recent">Recent activity</string>

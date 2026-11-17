@@ -203,6 +203,20 @@ class EngineRobolectricTest {
     for (category in TicketCategory.entries) {
       assertEquals(category, converters.toTicketCategory(converters.fromTicketCategory(category)))
     }
+    assertEquals(
+      listOf(
+        TicketCategory.PLUMBING,
+        TicketCategory.ELECTRICAL,
+        TicketCategory.AIR_CONDITIONING,
+        TicketCategory.FURNITURE,
+        TicketCategory.OTHER,
+      ),
+      TicketCategory.entries,
+    )
+    // Retired values from older installs degrade instead of crashing reads.
+    assertEquals(TicketCategory.OTHER, converters.toTicketCategory("LINEN"))
+    assertEquals(TicketCategory.OTHER, converters.toTicketCategory("MINIBAR"))
+    assertEquals(TicketCategory.OTHER, converters.toTicketCategory("BOGUS"))
     for (status in TicketStatus.entries) {
       assertEquals(status, converters.toTicketStatus(converters.fromTicketStatus(status)))
     }
@@ -252,7 +266,7 @@ class EngineRobolectricTest {
     assertEquals("বিছানার চাদর বদলান", stepLabels.first())
 
     val categories = TicketCategory.entries.map { context.getString(it.labelRes) }
-    assertEquals(6, categories.toSet().size)
+    assertEquals(5, categories.toSet().size)
     categories.forEach { assertTrue(it.isNotBlank()) }
 
     assertEquals("হাউসকিপার", context.getString(StaffRole.HOUSEKEEPER.labelRes))

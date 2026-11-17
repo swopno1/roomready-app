@@ -3,12 +3,11 @@ package com.vivereply.roomready.domain.model
 import androidx.annotation.StringRes
 import com.vivereply.roomready.R
 
-/** Maintenance ticket category. */
+/** Maintenance ticket category: exactly the five raise-sheet chips. */
 enum class TicketCategory(@param:StringRes val labelRes: Int) {
   PLUMBING(R.string.ticket_category_plumbing),
   ELECTRICAL(R.string.ticket_category_electrical),
-  LINEN(R.string.ticket_category_linen),
-  MINIBAR(R.string.ticket_category_minibar),
+  AIR_CONDITIONING(R.string.ticket_category_ac),
   FURNITURE(R.string.ticket_category_furniture),
   OTHER(R.string.ticket_category_other),
 }

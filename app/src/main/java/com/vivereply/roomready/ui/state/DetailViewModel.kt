@@ -6,10 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.vivereply.roomready.data.EngineGraph
 import com.vivereply.roomready.data.photos.PhotoStore
 import com.vivereply.roomready.data.pms.SyncOrchestrator
+import com.vivereply.roomready.data.repository.ActivityRepository
 import com.vivereply.roomready.data.repository.RoomRepository
 import com.vivereply.roomready.domain.model.ChecklistProgress
 import com.vivereply.roomready.domain.model.CleaningEvidence
 import com.vivereply.roomready.R
+import com.vivereply.roomready.domain.model.HousekeepingState
 import com.vivereply.roomready.domain.model.RoomType
 import com.vivereply.roomready.domain.model.RoomUnit
 import com.vivereply.roomready.domain.model.StaffMember
@@ -35,7 +37,7 @@ class DetailViewModelFactory(
 ) : ViewModelProvider.Factory {
   @Suppress("UNCHECKED_CAST")
   override fun <T : ViewModel> create(modelClass: Class<T>): T =
-    DetailViewModel(unitId, graph.rooms, graph.orchestrator, graph.photos) as T
+    DetailViewModel(unitId, graph.rooms, graph.activity, graph.orchestrator, graph.photos) as T
 }
 
 /**
@@ -46,6 +48,7 @@ class DetailViewModelFactory(
 class DetailViewModel(
   val unitId: String,
   private val rooms: RoomRepository,
+  private val activityLog: ActivityRepository,
   private val orchestrator: SyncOrchestrator,
   private val photos: PhotoStore,
 ) : ViewModel() {
@@ -65,6 +68,9 @@ class DetailViewModel(
 
   private val _evidence = MutableStateFlow<CleaningEvidence?>(null)
   val evidence: StateFlow<CleaningEvidence?> = _evidence.asStateFlow()
+
+  private val _sentBackReason = MutableStateFlow<String?>(null)
+  val sentBackReason: StateFlow<String?> = _sentBackReason.asStateFlow()
 
   private val _pendingPhoto = MutableStateFlow<String?>(photos.pendingRef(unitId))
   val pendingPhoto: StateFlow<String?> = _pendingPhoto.asStateFlow()
@@ -87,6 +93,13 @@ class DetailViewModel(
       tick.collect {
         _progress.value = rooms.progress(unitId)
         _evidence.value = rooms.evidenceFor(unitId)
+        val current = rooms.getUnit(unitId)
+        _sentBackReason.value =
+          if (current?.hkState == HousekeepingState.DIRTY) {
+            activityLog.lastSentBack(unitId)?.detail
+          } else {
+            null
+          }
       }
     }
   }

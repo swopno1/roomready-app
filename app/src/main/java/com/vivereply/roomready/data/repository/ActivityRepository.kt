@@ -15,6 +15,9 @@ class ActivityRepository(private val activity: ActivityDao) {
   suspend fun recent(limit: Int = DEFAULT_LIMIT): List<ActivityEvent> =
     activity.getRecent(limit).map(ActivityEntity::toDomain)
 
+  suspend fun lastSentBack(unitId: String): ActivityEvent? =
+    activity.lastSentBack(unitId)?.toDomain()
+
   companion object {
     const val DEFAULT_LIMIT: Int = 100
   }

@@ -2,6 +2,7 @@ package com.vivereply.roomready.data
 
 import com.vivereply.roomready.data.local.ActivityDao
 import com.vivereply.roomready.data.local.ActivityEntity
+import com.vivereply.roomready.domain.model.ActivityType
 import com.vivereply.roomready.data.local.ChecklistDao
 import com.vivereply.roomready.data.local.ChecklistStepEntity
 import com.vivereply.roomready.data.local.CleaningEvidenceDao
@@ -199,6 +200,77 @@ class OfflineEngineTest {
     }
 
   @Test
+  fun `housekeeper cannot inspect at the repository layer`() =
+    runTest {
+      seedUnit(id = "u-101", number = "101", hk = HousekeepingState.CLEANED)
+      val result = rooms.inspect("u-101", housekeeper)
+      assertTrue(result.isFailure)
+      val error = result.exceptionOrNull() as HkTransitionException
+      assertTrue(error.error is HkTransitionError.IllegalTransition)
+      assertEquals(HousekeepingState.CLEANED, rooms.getUnit("u-101")?.hkState)
+      assertEquals(0, queue.pendingCount())
+      assertTrue(activity.events.isEmpty())
+    }
+
+  @Test
+  fun `supervisor pass and send-back round trip`() =
+    runTest {
+      seedUnit(id = "u-101", number = "101", hk = HousekeepingState.DIRTY)
+      seedUnit(id = "u-102", number = "102", hk = HousekeepingState.DIRTY)
+      // Pass path: full clean then inspect to Ready.
+      assertSuccess(rooms.startCleaning("u-101", housekeeper))
+      for (step in TurnoverStep.entries) {
+        assertSuccess(rooms.setStepDone("u-101", step, true, housekeeper))
+      }
+      assertSuccess(rooms.finishCleaning("u-101", housekeeper, "f.jpg", null))
+      assertSuccess(rooms.inspect("u-101", supervisor))
+      assertEquals(HousekeepingState.READY, rooms.getUnit("u-101")?.hkState)
+      // Send-back path: reason stored, evidence cleared, redo required.
+      assertSuccess(rooms.startCleaning("u-102", housekeeper))
+      for (step in TurnoverStep.entries) {
+        assertSuccess(rooms.setStepDone("u-102", step, true, housekeeper))
+      }
+      assertSuccess(rooms.finishCleaning("u-102", housekeeper, null, "too dark"))
+      assertSuccess(rooms.sendBack("u-102", supervisor, "streaks on mirror"))
+      assertEquals(HousekeepingState.DIRTY, rooms.getUnit("u-102")?.hkState)
+      assertEquals(null, rooms.evidenceFor("u-102"))
+      val sentBack = activity.events.single { it.type == ActivityType.SENT_BACK }
+      assertEquals("streaks on mirror", sentBack.detail)
+      assertEquals("102", sentBack.roomNumber)
+    }
+
+  @Test
+  fun `ticket raised offline syncs when connectivity returns`() =
+    runTest {
+      seedUnit(id = "u-101", number = "101", hk = HousekeepingState.DIRTY)
+      val ticket =
+        ticketRepo.raiseTicket(
+          "u-101",
+          TicketCategory.AIR_CONDITIONING,
+          "no cooling",
+          null,
+          housekeeper,
+        ).getOrThrow()
+      assertEquals(1, queue.pendingCount())
+
+      val transport = RecordingTransport(failuresBeforeSuccess = 1)
+      val engine = SyncEngine(queue, activity, transport, clock)
+      val offline = engine.drain()
+      assertEquals(0, offline.delivered)
+      assertEquals(1, offline.rescheduled)
+
+      clock.advance(SyncRetryPolicy.BASE_DELAY_MILLIS)
+      val online = engine.drain()
+      assertEquals(1, online.delivered)
+      assertEquals(0, queue.pendingCount())
+      val sent = transport.sent.single()
+      assertEquals(SyncEntityType.TICKET, sent.entityType)
+      assertEquals(ticket.id, sent.entityId)
+      assertTrue(sent.payloadJson.contains("no cooling"))
+      assertTrue(sent.payloadJson.contains("AIR_CONDITIONING"))
+    }
+
+  @Test
   fun `send back clears finish evidence for the redo`() =
     runTest {
       seedUnit(id = "u-101", number = "101", hk = HousekeepingState.DIRTY)
@@ -243,15 +315,15 @@ class OfflineEngineTest {
     runTest {
       seedUnit(id = "u-101", number = "101", hk = HousekeepingState.DIRTY)
       assertTrue(
-        ticketRepo.raiseTicket("missing", TicketCategory.LINEN, "note", null, housekeeper).isFailure,
+        ticketRepo.raiseTicket("missing", TicketCategory.OTHER, "note", null, housekeeper).isFailure,
       )
       assertTrue(
-        ticketRepo.raiseTicket("u-101", TicketCategory.LINEN, "   ", null, housekeeper).isFailure,
+        ticketRepo.raiseTicket("u-101", TicketCategory.OTHER, "   ", null, housekeeper).isFailure,
       )
       val raised =
-        ticketRepo.raiseTicket("u-101", TicketCategory.MINIBAR, "  restock cola ", null, housekeeper)
+        ticketRepo.raiseTicket("u-101", TicketCategory.FURNITURE, "  wobbly chair ", null, housekeeper)
       assertSuccess(raised)
-      assertEquals("restock cola", raised.getOrNull()?.note)
+      assertEquals("wobbly chair", raised.getOrNull()?.note)
       assertEquals("101", raised.getOrNull()?.roomNumber)
       assertEquals(null, raised.getOrNull()?.photoRef)
     }
@@ -335,7 +407,7 @@ class OfflineEngineTest {
       assertSuccess(rooms.startCleaning("u-101", housekeeper))
       clock.advance(5_000L)
       assertSuccess(
-        ticketRepo.raiseTicket("u-101", TicketCategory.LINEN, "no towels", null, housekeeper),
+        ticketRepo.raiseTicket("u-101", TicketCategory.AIR_CONDITIONING, "no cooling", null, housekeeper),
       )
       val transport = RecordingTransport()
       val engine = SyncEngine(queue, activity, transport, clock)
@@ -556,6 +628,10 @@ class OfflineEngineTest {
 
     override fun observeRecent(limit: Int): Flow<List<ActivityEntity>> =
       MutableStateFlow(events.toList())
+
+    override suspend fun lastSentBack(unitId: String): ActivityEntity? =
+      events.filter { it.type == ActivityType.SENT_BACK && it.unitId == unitId }
+        .maxWithOrNull(compareBy({ it.createdAt }, { it.id }))
   }
 
   private class FakeSyncQueueDao : SyncQueueDao {

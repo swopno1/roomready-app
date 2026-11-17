@@ -96,6 +96,7 @@ data class RoomDetailUiState(
   val typeName: String = "",
   val progress: ChecklistProgress? = null,
   val evidence: CleaningEvidence? = null,
+  val sentBackReason: String? = null,
   val role: StaffRole? = null,
   val busy: Boolean = false,
   val actionError: Int? = null,
@@ -112,6 +113,8 @@ fun DetailRoute(
   graph: EngineGraph,
   languageTag: String,
   onTakePhoto: () -> Unit,
+  onOpenInspect: (String) -> Unit,
+  onRaiseTicket: (String) -> Unit,
   onClose: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -119,6 +122,7 @@ fun DetailRoute(
   val type by viewModel.type.collectAsStateWithLifecycle()
   val progress by viewModel.progress.collectAsStateWithLifecycle()
   val evidence by viewModel.evidence.collectAsStateWithLifecycle()
+  val sentBackReason by viewModel.sentBackReason.collectAsStateWithLifecycle()
   val role by viewModel.role.collectAsStateWithLifecycle()
   val busy by viewModel.busy.collectAsStateWithLifecycle()
   val actionError by viewModel.actionError.collectAsStateWithLifecycle()
@@ -153,6 +157,7 @@ fun DetailRoute(
           type?.let { if (languageTag.startsWith("bn")) it.nameBn else it.nameEn } ?: "",
         progress = progress,
         evidence = evidence,
+        sentBackReason = sentBackReason,
         role = role,
         busy = busy,
         actionError = actionError,
@@ -163,8 +168,9 @@ fun DetailRoute(
       ),
     onBack = onClose,
     onStart = { viewModel.startCleaning() },
-    onInspect = { viewModel.inspect() },
+    onInspect = { unit?.let { onOpenInspect(it.id) } },
     onSendBack = { sendBackOpen = true },
+    onRaiseTicket = { unit?.let { onRaiseTicket(it.id) } },
     onToggleStep = { step, done -> viewModel.toggleStep(step, done) },
     onOpenFinish = { sheetOpen = true },
     onTakePhoto = onTakePhoto,
@@ -232,6 +238,7 @@ fun RoomDetailScreen(
   onStart: () -> Unit,
   onInspect: () -> Unit,
   onSendBack: () -> Unit,
+  onRaiseTicket: () -> Unit,
   onToggleStep: (TurnoverStep, Boolean) -> Unit,
   onOpenFinish: () -> Unit,
   onTakePhoto: () -> Unit,
@@ -243,6 +250,7 @@ fun RoomDetailScreen(
 ) {
   val colors = RoomReadyThemeTokens.colors
   val spacing = RoomReadyThemeTokens.spacing
+  val radius = RoomReadyThemeTokens.radius
   val unit = state.unit
 
   Column(modifier = modifier.fillMaxSize().background(colors.canvas)) {
@@ -285,6 +293,20 @@ fun RoomDetailScreen(
           EvidenceCard(evidence = evidence)
         }
       }
+      state.sentBackReason?.let { reason ->
+        Surface(
+          modifier = Modifier.fillMaxWidth(),
+          shape = RoundedCornerShape(radius.md),
+          color = colors.statusDirtyContainer,
+        ) {
+          Text(
+            text = stringResource(R.string.detail_sent_back, reason),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.onStatusDirtyContainer,
+            modifier = Modifier.padding(spacing.md).testTag("detail_sentback"),
+          )
+        }
+      }
       DetailActions(
         unit = unit,
         role = state.role,
@@ -309,6 +331,15 @@ fun RoomDetailScreen(
           enabled = !state.busy,
           onToggleStep = onToggleStep,
         )
+      }
+      OutlinedButton(
+        onClick = onRaiseTicket,
+        modifier =
+          Modifier.fillMaxWidth().heightIn(min = 48.dp).minimumInteractiveComponentSize()
+            .testTag("detail_raise_ticket"),
+        shape = RoundedCornerShape(radius.md),
+      ) {
+        Text(stringResource(R.string.ticket_new_title), style = MaterialTheme.typography.labelLarge)
       }
       Spacer(modifier = Modifier.height(spacing.md))
     }

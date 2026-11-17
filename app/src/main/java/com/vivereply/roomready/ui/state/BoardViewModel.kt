@@ -90,18 +90,15 @@ class BoardViewModel(
   }
 
   fun runAction(action: UnitAction, unit: RoomUnit) {
-    // FINISH always routes to the room detail screen (photo/reason sheet);
-    // the board executes START and INSPECT immediately.
-    if (action == UnitAction.FINISH) return
+    // FINISH routes to the room detail screen (photo/reason sheet) and
+    // INSPECT to the inspect screen (checklist + evidence review); the board
+    // executes START immediately.
+    if (action != UnitAction.START_CLEANING) return
     viewModelScope.launch {
       val staff = orchestrator.staffIdentity() ?: return@launch
       _busyUnits.value += unit.id
       _actionErrors.value -= unit.id
-      val result =
-        when (action) {
-          UnitAction.START_CLEANING -> rooms.startCleaning(unit.id, staff)
-          else -> rooms.inspect(unit.id, staff)
-        }
+      val result = rooms.startCleaning(unit.id, staff)
       _busyUnits.value -= unit.id
       result.fold(
         onSuccess = { _actionErrors.value -= unit.id },

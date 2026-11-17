@@ -64,6 +64,7 @@ fun RoomsRoute(
   connection: ConnectionViewModel,
   languageTag: String,
   onOpenDetail: (String) -> Unit,
+  onOpenInspect: (String) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val units by board.units.collectAsStateWithLifecycle()
@@ -99,7 +100,11 @@ fun RoomsRoute(
     languageTag = languageTag,
     onFilter = { board.setFilter(it) },
     onAction = { action, unit ->
-      if (action == UnitAction.FINISH) onOpenDetail(unit.id) else board.runAction(action, unit)
+      when (action) {
+        UnitAction.FINISH -> onOpenDetail(unit.id)
+        UnitAction.INSPECT -> onOpenInspect(unit.id)
+        UnitAction.START_CLEANING -> board.runAction(action, unit)
+      }
     },
     onSendBack = { sendBackTarget = it },
     onCardClick = { onOpenDetail(it.id) },

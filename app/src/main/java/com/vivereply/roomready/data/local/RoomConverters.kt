@@ -40,7 +40,12 @@ class RoomConverters {
   fun fromTicketCategory(value: TicketCategory): String = value.name
 
   @TypeConverter
-  fun toTicketCategory(value: String): TicketCategory = TicketCategory.valueOf(value)
+  fun toTicketCategory(value: String): TicketCategory =
+    try {
+      TicketCategory.valueOf(value)
+    } catch (e: IllegalArgumentException) {
+      TicketCategory.OTHER
+    }
 
   @TypeConverter
   fun fromTicketStatus(value: TicketStatus): String = value.name

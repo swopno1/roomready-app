@@ -177,6 +177,10 @@ class SyncParkTest {
 
     override fun observeRecent(limit: Int): Flow<List<ActivityEntity>> =
       MutableStateFlow(events.toList())
+
+    override suspend fun lastSentBack(unitId: String): ActivityEntity? =
+      events.filter { it.type == ActivityType.SENT_BACK && it.unitId == unitId }
+        .maxWithOrNull(compareBy({ it.createdAt }, { it.id }))
   }
 
   private class ScriptedTransport(private val failWith: Map<Long, Int>) : PmsTransport {

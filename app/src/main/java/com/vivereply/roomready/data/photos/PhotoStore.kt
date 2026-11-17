@@ -24,6 +24,7 @@ import kotlin.math.max
 class PhotoStore(context: Context) {
   private val appContext: Context = context.applicationContext
   private val dir: File = File(appContext.filesDir, PHOTOS_DIR).apply { mkdirs() }
+  private val ticketDir: File = File(appContext.filesDir, TICKET_PHOTOS_DIR).apply { mkdirs() }
   private val prefs = appContext.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
 
   fun pendingRef(unitId: String): String? = prefs.getString(key(unitId), null)
@@ -42,7 +43,16 @@ class PhotoStore(context: Context) {
    * Compresses [source] into the photo dir and deletes the source.
    * Returns the stored ref (file name). Blocking: call on Dispatchers.IO.
    */
-  fun compress(source: File, unitId: String): String {
+  fun compress(source: File, unitId: String): String = compressInto(source, dir, unitId)
+
+  /**
+   * Compresses a ticket photo into the ticket bucket. Blocking: call on
+   * Dispatchers.IO. Temp capture files stay in cache until raise succeeds.
+   */
+  fun compressTicket(source: File, ticketId: String): String =
+    compressInto(source, ticketDir, ticketId)
+
+  private fun compressInto(source: File, targetDir: File, prefix: String): String {
     val bounds =
       BitmapFactory.Options().apply {
         inJustDecodeBounds = true
@@ -57,8 +67,8 @@ class PhotoStore(context: Context) {
       BitmapFactory.decodeFile(source.absolutePath, BitmapFactory.Options().apply { inSampleSize = sample })
         ?: throw IOException("decode failed")
     val oriented = applyExifRotation(source, decoded)
-    val safeUnit = unitId.replace(Regex("[^A-Za-z0-9_-]"), "_")
-    val target = File(dir, "${safeUnit}_${System.currentTimeMillis()}.jpg")
+    val safeUnit = prefix.replace(Regex("[^A-Za-z0-9_-]"), "_")
+    val target = File(targetDir, "${safeUnit}_${System.currentTimeMillis()}.jpg")
     try {
       FileOutputStream(target).use { out ->
         if (!oriented.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)) {
@@ -73,10 +83,15 @@ class PhotoStore(context: Context) {
   }
 
   /** Resolves a stored ref, guarding against path traversal. Never null for valid refs. */
-  fun fileFor(ref: String?): File? {
+  fun fileFor(ref: String?): File? = fileInDir(dir, ref)
+
+  /** Resolves a stored ticket photo ref. */
+  fun ticketFileFor(ref: String?): File? = fileInDir(ticketDir, ref)
+
+  private fun fileInDir(bucket: File, ref: String?): File? {
     if (ref.isNullOrBlank()) return null
-    val file = File(dir, ref)
-    return if (file.canonicalPath.startsWith(dir.canonicalPath + File.separator)) file else null
+    val file = File(bucket, ref)
+    return if (file.canonicalPath.startsWith(bucket.canonicalPath + File.separator)) file else null
   }
 
   /** Downsampled bitmap for thumbnails. Blocking: call on Dispatchers.IO. */
@@ -88,6 +103,12 @@ class PhotoStore(context: Context) {
   /** Downsampled bitmap for a fresh capture awaiting review. Blocking: call on Dispatchers.IO. */
   fun loadTempThumbnail(file: File, maxDim: Int = THUMB_DIMENSION): ImageBitmap? =
     decodeSampled(file, maxDim)?.asImageBitmap()
+
+  /** Downsampled bitmap for a stored ticket photo. Blocking: call on Dispatchers.IO. */
+  fun loadTicketThumbnail(ref: String?, maxDim: Int = THUMB_DIMENSION): ImageBitmap? {
+    val file = ticketFileFor(ref) ?: return null
+    return decodeSampled(file, maxDim)?.asImageBitmap()
+  }
 
   private fun decodeSampled(file: File, maxDim: Int): Bitmap? {
     if (!file.exists()) return null
@@ -126,6 +147,7 @@ class PhotoStore(context: Context) {
 
   companion object {
     const val PHOTOS_DIR: String = "cleaning_photos"
+    const val TICKET_PHOTOS_DIR: String = "ticket_photos"
     const val PREFS_FILE: String = "roomready_photos"
     const val MAX_DIMENSION: Int = 1280
     const val JPEG_QUALITY: Int = 70

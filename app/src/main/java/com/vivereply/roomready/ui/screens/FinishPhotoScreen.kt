@@ -48,6 +48,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
+import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -71,6 +72,7 @@ fun FinishPhotoRoute(
   onPhotoReady: (File) -> Unit,
   onClose: () -> Unit,
   modifier: Modifier = Modifier,
+  @StringRes hintRes: Int = R.string.finish_photo,
 ) {
   val context = LocalContext.current
   var hasPermission by remember {
@@ -96,6 +98,7 @@ fun FinishPhotoRoute(
     onLoadPreview = { file -> withContext(Dispatchers.IO) { graph.photos.loadTempThumbnail(file) } },
     onPhotoReady = onPhotoReady,
     onClose = onClose,
+    hintRes = hintRes,
     modifier = modifier,
   )
 }
@@ -141,6 +144,7 @@ private fun FinishPhotoScreen(
   onLoadPreview: suspend (File) -> ImageBitmap?,
   onPhotoReady: (File) -> Unit,
   onClose: () -> Unit,
+  @StringRes hintRes: Int,
   modifier: Modifier = Modifier,
 ) {
   val context = LocalContext.current
@@ -335,7 +339,7 @@ private fun FinishPhotoScreen(
       }
       Spacer(modifier = Modifier.height(spacing.sm))
       Text(
-        text = stringResource(R.string.finish_photo),
+        text = stringResource(hintRes),
         style = MaterialTheme.typography.bodyMedium,
         color = colors.onInk,
         textAlign = TextAlign.Center,

@@ -5,4 +5,5 @@
     <!-- Local photo files and refs are meaningless on restore. -->
     <exclude domain="sharedpref" path="roomready_photos.xml" />
     <exclude domain="file" path="cleaning_photos/" />
+    <exclude domain="file" path="ticket_photos/" />
 </full-backup-content>

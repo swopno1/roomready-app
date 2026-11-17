@@ -54,10 +54,14 @@ import com.vivereply.roomready.ui.components.LogoLockupVariant
 import com.vivereply.roomready.ui.components.RoomReadyLogoLockup
 import com.vivereply.roomready.ui.navigation.RoomReadyDestination
 import com.vivereply.roomready.ui.navigation.RoomReadyRoute
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.vivereply.roomready.ui.screens.ActivityRoute
 import com.vivereply.roomready.ui.screens.DetailRoute
 import com.vivereply.roomready.ui.screens.FinishPhotoRoute
 import com.vivereply.roomready.ui.screens.HomeRoute
+import com.vivereply.roomready.ui.screens.InspectRoute
+import com.vivereply.roomready.ui.screens.TicketFormRoute
 import com.vivereply.roomready.ui.screens.ProfileRoute
 import com.vivereply.roomready.ui.screens.QrScanScreen
 import com.vivereply.roomready.ui.screens.RoomsRoute
@@ -99,7 +103,7 @@ fun RoomReadyApp(
   val currentRoute = navBackStackEntry?.destination?.route ?: RoomReadyDestination.Home.route
   val onFullScreenRoute =
     currentRoute == RoomReadyRoute.SETUP || currentRoute == RoomReadyRoute.QR_SCAN ||
-      currentRoute.startsWith("room/")
+      currentRoute.startsWith("room/") || currentRoute.startsWith("ticket/")
 
   fun navigateToTab(destination: RoomReadyDestination) {
     navController.navigate(destination.route) {
@@ -282,6 +286,7 @@ fun RoomReadyApp(
                   navigateToTab(RoomReadyDestination.Rooms)
                 },
                 onOpenDetail = { unitId -> navController.navigate(RoomReadyRoute.room(unitId)) },
+                onOpenInspect = { unitId -> navController.navigate(RoomReadyRoute.inspect(unitId)) },
               )
             } else {
               TabEmptyStateScreen(
@@ -299,6 +304,7 @@ fun RoomReadyApp(
                 connection = connection,
                 languageTag = currentLanguageTag,
                 onOpenDetail = { unitId -> navController.navigate(RoomReadyRoute.room(unitId)) },
+                onOpenInspect = { unitId -> navController.navigate(RoomReadyRoute.inspect(unitId)) },
               )
             } else {
               TabEmptyStateScreen(
@@ -311,7 +317,10 @@ fun RoomReadyApp(
           }
           composable(RoomReadyDestination.Tickets.route) {
             if (connected.connected) {
-              TicketsRoute(viewModel = tickets)
+              TicketsRoute(
+                viewModel = tickets,
+                onNewTicket = { navController.navigate(RoomReadyRoute.ticketForm(null)) },
+              )
             } else {
               TabEmptyStateScreen(
                 destination = RoomReadyDestination.Tickets,
@@ -384,7 +393,50 @@ fun RoomReadyApp(
               graph = graph,
               languageTag = currentLanguageTag,
               onTakePhoto = { navController.navigate(RoomReadyRoute.photo(unitId)) },
+              onOpenInspect = { id -> navController.navigate(RoomReadyRoute.inspect(id)) },
+              onRaiseTicket = { id ->
+                navController.navigate(RoomReadyRoute.ticketForm(id))
+              },
               onClose = { navController.popBackStack() },
+            )
+          }
+          composable(RoomReadyRoute.INSPECT_PATTERN) { entry ->
+            val unitId = entry.arguments?.getString("unitId") ?: return@composable
+            val inspectVm: DetailViewModel =
+              viewModel(
+                key = "inspect_$unitId",
+                factory = remember(graph, unitId) { DetailViewModelFactory(graph, unitId) },
+              )
+            InspectRoute(
+              viewModel = inspectVm,
+              graph = graph,
+              languageTag = currentLanguageTag,
+              onClose = { navController.popBackStack() },
+            )
+          }
+          composable(
+            route = RoomReadyRoute.TICKET_FORM_PATTERN,
+            arguments = listOf(navArgument("unitId") { type = NavType.StringType; nullable = true }),
+          ) { entry ->
+            TicketFormRoute(
+              tickets = tickets,
+              board = board,
+              graph = graph,
+              preselectedUnitId = entry.arguments?.getString("unitId"),
+              onTakePhoto = { navController.navigate(RoomReadyRoute.TICKET_PHOTO) },
+              onRaised = { navController.popBackStack() },
+              onBack = { navController.popBackStack() },
+            )
+          }
+          composable(RoomReadyRoute.TICKET_PHOTO) {
+            FinishPhotoRoute(
+              graph = graph,
+              onPhotoReady = { file ->
+                tickets.attachTempPhoto(file)
+                navController.popBackStack()
+              },
+              onClose = { navController.popBackStack() },
+              hintRes = R.string.ticket_photo_hint,
             )
           }
           composable(RoomReadyRoute.PHOTO_PATTERN) { entry ->

@@ -58,8 +58,7 @@
     <!-- Ticket Categories -->
     <string name="ticket_category_plumbing">প্লাম্বিং</string>
     <string name="ticket_category_electrical">বৈদ্যুতিক</string>
-    <string name="ticket_category_linen">লিনেন</string>
-    <string name="ticket_category_minibar">মিনিবার</string>
+    <string name="ticket_category_ac">এসি</string>
     <string name="ticket_category_furniture">আসবাবপত্র</string>
     <string name="ticket_category_other">অন্যান্য</string>
 
@@ -192,6 +191,25 @@
     <string name="tickets_open_title">খোলা টিকিট</string>
     <string name="tickets_none_after_sync">কোনো খোলা টিকিট নেই। চমৎকার কাজ।</string>
     <string name="tickets_row_cd">রুম %1$s-এর টিকিট: %2$s</string>
+    <string name="ticket_new_title">নতুন টিকিট</string>
+    <string name="ticket_room">রুম</string>
+    <string name="ticket_pick_room">রুম বেছে নিন</string>
+    <string name="ticket_note_label">সমস্যা কী?</string>
+    <string name="ticket_note_hint">সমস্যাটি লিখুন</string>
+    <string name="ticket_add_photo">ছবি যোগ করুন</string>
+    <string name="ticket_raise">টিকিট খুলুন</string>
+    <string name="ticket_status_open">খোলা</string>
+    <string name="ticket_status_done">সম্পন্ন</string>
+    <string name="ticket_age">%1$s পুরনো</string>
+    <string name="ticket_mark_done">সম্পন্ন</string>
+    <string name="ticket_photo_hint">সমস্যার ছবি তুলুন</string>
+    <string name="ticket_photo_error">ছবি সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।</string>
+
+    <!-- Inspection -->
+    <string name="inspect_title">রুম %1$s পরিদর্শন</string>
+    <string name="inspect_checklist">সম্পন্ন চেকলিস্ট</string>
+    <string name="inspect_pass">পাস</string>
+    <string name="detail_sent_back">ফেরত: %1$s</string>
 
     <!-- Activity -->
     <string name="activity_recent">সাম্প্রতিক কার্যক্রম</string>

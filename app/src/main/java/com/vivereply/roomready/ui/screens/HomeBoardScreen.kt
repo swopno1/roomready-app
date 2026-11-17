@@ -87,6 +87,7 @@ fun HomeRoute(
   languageTag: String,
   onFilterSelected: (BoardFilter) -> Unit,
   onOpenDetail: (String) -> Unit,
+  onOpenInspect: (String) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val status by connection.status.collectAsStateWithLifecycle()
@@ -124,7 +125,11 @@ fun HomeRoute(
     onSyncNow = { connection.syncNow() },
     onFilterSelected = onFilterSelected,
     onAction = { action, unit ->
-      if (action == UnitAction.FINISH) onOpenDetail(unit.id) else board.runAction(action, unit)
+      when (action) {
+        UnitAction.FINISH -> onOpenDetail(unit.id)
+        UnitAction.INSPECT -> onOpenInspect(unit.id)
+        UnitAction.START_CLEANING -> board.runAction(action, unit)
+      }
     },
     onSendBack = { sendBackTarget = it },
     onCardClick = { onOpenDetail(it.id) },
