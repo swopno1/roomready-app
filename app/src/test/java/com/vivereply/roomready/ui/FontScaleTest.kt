@@ -1,5 +1,9 @@
 package com.vivereply.roomready.ui
 
+import androidx.activity.compose.LocalActivityResultRegistryOwner
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
@@ -7,6 +11,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.Density
+import androidx.core.app.ActivityOptionsCompat
+import androidx.test.core.app.ApplicationProvider
 import com.vivereply.roomready.domain.model.ActivityEvent
 import com.vivereply.roomready.domain.model.ActivityType
 import com.vivereply.roomready.domain.model.ChecklistProgress
@@ -19,15 +25,18 @@ import com.vivereply.roomready.domain.model.StaffMember
 import com.vivereply.roomready.domain.model.StaffRole
 import com.vivereply.roomready.domain.model.Ticket
 import com.vivereply.roomready.domain.model.TicketCategory
+import com.vivereply.roomready.data.EngineGraph
 import com.vivereply.roomready.domain.model.TicketStatus
 import com.vivereply.roomready.domain.model.TurnoverStep
 import com.vivereply.roomready.ui.navigation.RoomReadyDestination
 import com.vivereply.roomready.ui.screens.ActivityScreen
+import com.vivereply.roomready.ui.screens.FinishPhotoRoute
 import com.vivereply.roomready.ui.screens.HomeDashboardScreen
 import com.vivereply.roomready.ui.screens.HomeDashboardUiState
 import com.vivereply.roomready.ui.screens.InspectScreen
 import com.vivereply.roomready.ui.screens.InspectUiState
 import com.vivereply.roomready.ui.screens.ProfileScreen
+import com.vivereply.roomready.ui.screens.QrScanScreen
 import com.vivereply.roomready.ui.screens.RoomsBoardScreen
 import com.vivereply.roomready.ui.screens.RoomsBoardUiState
 import com.vivereply.roomready.ui.screens.RoomDetailScreen
@@ -104,6 +113,14 @@ class FontScaleTest {
   @Test fun `empty state survives 1_3x`() = checkEmpty(1.3f)
 
   @Test fun `empty state survives 1_5x`() = checkEmpty(1.5f)
+
+  @Test fun `qr rationale survives 1_3x`() = checkQr(1.3f)
+
+  @Test fun `qr rationale survives 1_5x`() = checkQr(1.5f)
+
+  @Test fun `finish rationale survives 1_3x`() = checkFinishRationale(1.3f)
+
+  @Test fun `finish rationale survives 1_5x`() = checkFinishRationale(1.5f)
 
   private fun checkHome(scale: Float) {
     renderAt(scale) {
@@ -329,6 +346,43 @@ class FontScaleTest {
     compose.onNodeWithText("Set up your housekeeper profile").assertExists()
     compose.onNodeWithTag("lang_chip_bn").assertExists()
   }
+
+  private fun checkQr(scale: Float) {
+    renderAt(scale) {
+      CompositionLocalProvider(LocalActivityResultRegistryOwner provides testRegistryOwner) {
+        QrScanScreen(onPairing = {}, onClose = {})
+      }
+    }
+    compose.onNodeWithTag("qr_grant").assertExists()
+  }
+
+  private fun checkFinishRationale(scale: Float) {
+    renderAt(scale) {
+      CompositionLocalProvider(LocalActivityResultRegistryOwner provides testRegistryOwner) {
+        FinishPhotoRoute(
+          graph = EngineGraph(ApplicationProvider.getApplicationContext()),
+          onPhotoReady = {},
+          onClose = {},
+        )
+      }
+    }
+    compose.onNodeWithText("Allow camera").assertExists()
+  }
+
+  private val testRegistryOwner =
+    object : ActivityResultRegistryOwner {
+      override val activityResultRegistry: ActivityResultRegistry =
+        object : ActivityResultRegistry() {
+          override fun <I, O> onLaunch(
+            requestCode: Int,
+            contract: ActivityResultContract<I, O>,
+            input: I,
+            options: ActivityOptionsCompat?,
+          ) {
+            // These tests render the rationale; nothing launches it.
+          }
+        }
+    }
 
   private fun renderAt(scale: Float, content: @Composable () -> Unit) {
     compose.setContent {
