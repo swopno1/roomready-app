@@ -37,6 +37,15 @@ class PhotoStore(context: Context) {
     prefs.edit { remove(key(unitId)) }
   }
 
+  /** Deletes all stored photo bytes and pending refs. Blocking: call on Dispatchers.IO. */
+  fun clearAll() {
+    prefs.edit(commit = true) { clear() }
+    dir.deleteRecursively()
+    ticketDir.deleteRecursively()
+    dir.mkdirs()
+    ticketDir.mkdirs()
+  }
+
   fun newTempFile(): File = File.createTempFile("capture_", ".jpg", appContext.cacheDir)
 
   /**

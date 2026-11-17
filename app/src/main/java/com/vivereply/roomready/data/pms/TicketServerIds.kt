@@ -14,6 +14,8 @@ interface TicketServerIds {
   fun serverIdFor(localId: String): String?
 
   fun localIdFor(serverId: String): String?
+
+  fun clear()
 }
 
 class PrefsTicketServerIds(context: Context) : TicketServerIds {
@@ -31,6 +33,10 @@ class PrefsTicketServerIds(context: Context) : TicketServerIds {
       if (key.startsWith(PREFIX) && value == serverId) return key.removePrefix(PREFIX)
     }
     return null
+  }
+
+  override fun clear() {
+    prefs.edit(commit = true) { clear() }
   }
 
   private fun key(localId: String): String = "$PREFIX$localId"

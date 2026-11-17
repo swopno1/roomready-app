@@ -225,16 +225,51 @@
     <string name="activity_t_bootstrap_imported">Board updated</string>
     <string name="activity_t_sync_completed">Sync sent %1$s</string>
     <string name="activity_t_push_parked">Push parked</string>
+    <string name="activity_sync_log">Sync log</string>
+    <string name="activity_offline_title">Works without internet</string>
+    <string name="activity_no_parked">Nothing parked — every push went through.</string>
+    <string name="activity_today_empty">Nothing yet today — it will show up here.</string>
+    <plurals name="activity_today_cleaned">
+        <item quantity="one">%1$d room cleaned</item>
+        <item quantity="other">%1$d rooms cleaned</item>
+    </plurals>
+    <plurals name="activity_today_tickets">
+        <item quantity="one">%1$d ticket raised</item>
+        <item quantity="other">%1$d tickets raised</item>
+    </plurals>
+    <plurals name="activity_today_synced">
+        <item quantity="one">%1$d change synced</item>
+        <item quantity="other">%1$d changes synced</item>
+    </plurals>
 
     <!-- Profile -->
     <string name="profile_connected">Connected</string>
     <string name="profile_property">Property</string>
+    <string name="profile_pms_address">PMS address</string>
     <string name="profile_staff">Staff</string>
     <string name="profile_key">API key</string>
     <string name="profile_edit">Edit connection</string>
+    <string name="profile_version">App version</string>
+    <string name="profile_disconnect">Disconnect</string>
+    <string name="disconnect_title">Disconnect from the PMS?</string>
+    <string name="disconnect_copy">This erases the saved key and all offline rooms, tickets and photos on this device.</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel">Room updates</string>
+    <string name="notif_morning_title">Today\'s rooms</string>
+    <string name="notif_inspect_title">Rooms waiting for inspection</string>
+    <plurals name="notif_morning_body">
+        <item quantity="one">%1$d room needs cleaning</item>
+        <item quantity="other">%1$d rooms need cleaning</item>
+    </plurals>
+    <plurals name="notif_inspect_body">
+        <item quantity="one">%1$d room ready to inspect</item>
+        <item quantity="other">%1$d rooms ready to inspect</item>
+    </plurals>
 
     <!-- Common Actions -->
     <string name="action_close">Close</string>
+    <string name="action_cancel">Cancel</string>
     <string name="action_retry">Try again</string>
 
     <!-- Language & Feedback -->

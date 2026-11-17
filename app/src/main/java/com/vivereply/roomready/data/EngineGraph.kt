@@ -79,4 +79,9 @@ class EngineGraph(context: Context, val clock: Clock = SystemClock) {
       appContext::getString,
     )
   }
+
+  /** Disconnect: wipe vault, connection, ticket ids, photos, and all tables. */
+  suspend fun disconnect() {
+    DataWipe(credentials, conn, ticketIds, photos, database).execute()
+  }
 }

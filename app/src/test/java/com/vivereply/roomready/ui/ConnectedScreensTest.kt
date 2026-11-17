@@ -23,6 +23,7 @@ import com.vivereply.roomready.ui.screens.HomeDashboardUiState
 import com.vivereply.roomready.ui.screens.SetupFormState
 import com.vivereply.roomready.ui.screens.SetupScreen
 import com.vivereply.roomready.ui.state.SyncStatusUi
+import com.vivereply.roomready.ui.state.TodayStats
 import com.vivereply.roomready.ui.theme.RoomReadyTheme
 import org.junit.Rule
 import org.junit.Test
@@ -122,6 +123,10 @@ class ConnectedScreensTest {
     compose.setContent {
       RoomReadyTheme {
         ActivityScreen(
+          lastSyncedText = null,
+          pendingCount = 0,
+          flagged = emptyList(),
+          today = TodayStats(0, 0, 0),
           events =
             listOf(
               ActivityEvent(
@@ -150,10 +155,10 @@ class ConnectedScreensTest {
       }
     }
     compose.onNodeWithTag("activity_list").assertIsDisplayed()
-    compose.onNodeWithTag("activity_parked_flag").assertIsDisplayed()
-    compose.onNodeWithText("Needs attention").assertIsDisplayed()
-    compose.onNodeWithText("TICKET t-bad HTTP 400").assertIsDisplayed()
-    compose.onNodeWithText("Push parked").assertIsDisplayed()
+    compose.onNodeWithTag("activity_parked_flag").performScrollTo().assertIsDisplayed()
+    compose.onNodeWithText("Needs attention").performScrollTo().assertIsDisplayed()
+    compose.onNodeWithText("TICKET t-bad HTTP 400").performScrollTo().assertIsDisplayed()
+    compose.onNodeWithText("Push parked").performScrollTo().assertIsDisplayed()
   }
 
   @Test

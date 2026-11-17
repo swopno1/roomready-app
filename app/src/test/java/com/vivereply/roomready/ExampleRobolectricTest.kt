@@ -207,12 +207,25 @@ class ExampleRobolectricTest {
         R.string.activity_t_bootstrap_imported,
         R.string.activity_t_sync_completed,
         R.string.activity_t_push_parked,
+        R.string.activity_sync_log,
+        R.string.activity_offline_title,
+        R.string.activity_no_parked,
+        R.string.activity_today_empty,
+        R.string.profile_version,
+        R.string.profile_disconnect,
+        R.string.disconnect_title,
+        R.string.disconnect_copy,
+        R.string.notif_channel,
+        R.string.notif_morning_title,
+        R.string.notif_inspect_title,
         R.string.profile_connected,
         R.string.profile_property,
+        R.string.profile_pms_address,
         R.string.profile_staff,
         R.string.profile_key,
         R.string.profile_edit,
         R.string.action_close,
+        R.string.action_cancel,
         R.string.action_retry,
       )
 
@@ -249,6 +262,41 @@ class ExampleRobolectricTest {
     )
     assertTrue(
       bnContext.resources.getQuantityString(R.plurals.checklist_progress, 3, 3, 8).contains("সম্পন্ন"),
+    )
+    assertTrue(
+      enContext.resources.getQuantityString(R.plurals.activity_today_cleaned, 1, 1)
+        .contains("1 room cleaned"),
+    )
+    assertTrue(
+      bnContext.resources.getQuantityString(R.plurals.activity_today_cleaned, 2, 2).contains("রুম পরিষ্কার"),
+    )
+    assertTrue(
+      enContext.resources.getQuantityString(R.plurals.activity_today_tickets, 1, 1)
+        .contains("1 ticket raised"),
+    )
+    assertTrue(
+      bnContext.resources.getQuantityString(R.plurals.activity_today_tickets, 2, 2).contains("টিকিট খোলা"),
+    )
+    assertTrue(
+      enContext.resources.getQuantityString(R.plurals.activity_today_synced, 1, 1)
+        .contains("1 change synced"),
+    )
+    assertTrue(
+      bnContext.resources.getQuantityString(R.plurals.activity_today_synced, 2, 2).contains("সিঙ্ক হয়েছে"),
+    )
+    assertTrue(
+      enContext.resources.getQuantityString(R.plurals.notif_morning_body, 1, 1)
+        .contains("1 room needs cleaning"),
+    )
+    assertTrue(
+      bnContext.resources.getQuantityString(R.plurals.notif_morning_body, 3, 3).contains("পরিষ্কার দরকার"),
+    )
+    assertTrue(
+      enContext.resources.getQuantityString(R.plurals.notif_inspect_body, 1, 1)
+        .contains("1 room ready to inspect"),
+    )
+    assertTrue(
+      bnContext.resources.getQuantityString(R.plurals.notif_inspect_body, 2, 2).contains("পরিদর্শনের জন্য প্রস্তুত"),
     )
 
     assertNotEquals(

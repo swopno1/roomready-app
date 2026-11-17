@@ -4,10 +4,16 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import com.vivereply.roomready.notifications.AlarmScheduler
+import com.vivereply.roomready.notifications.RoomReadyNotifications
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,9 +28,22 @@ import com.vivereply.roomready.ui.theme.RoomReadyTheme
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
+  private val notificationPermission =
+    registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     installSplashScreen()
     super.onCreate(savedInstanceState)
+
+    // Local daily alarms; posting no-ops until the permission is granted.
+    RoomReadyNotifications.ensureChannel(this)
+    AlarmScheduler.scheduleAll(this)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+      checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+      PackageManager.PERMISSION_GRANTED
+    ) {
+      notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
 
     enableEdgeToEdge(
       statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),

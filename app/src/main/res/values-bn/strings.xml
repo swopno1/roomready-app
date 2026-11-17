@@ -225,16 +225,51 @@
     <string name="activity_t_bootstrap_imported">বোর্ড হালনাগাদ</string>
     <string name="activity_t_sync_completed">সিঙ্কে পাঠানো হয়েছে %1$s</string>
     <string name="activity_t_push_parked">পাঠানো আটকে আছে</string>
+    <string name="activity_sync_log">সিঙ্ক লগ</string>
+    <string name="activity_offline_title">ইন্টারনেট ছাড়াই চলে</string>
+    <string name="activity_no_parked">আটকে থাকা কিছু নেই — সব পাঠানো সম্পন্ন।</string>
+    <string name="activity_today_empty">আজ এখনো কিছু হয়নি — এখানে দেখা যাবে।</string>
+    <plurals name="activity_today_cleaned">
+        <item quantity="one">%1$dটি রুম পরিষ্কার</item>
+        <item quantity="other">%1$dটি রুম পরিষ্কার</item>
+    </plurals>
+    <plurals name="activity_today_tickets">
+        <item quantity="one">%1$dটি টিকিট খোলা</item>
+        <item quantity="other">%1$dটি টিকিট খোলা</item>
+    </plurals>
+    <plurals name="activity_today_synced">
+        <item quantity="one">%1$dটি সিঙ্ক হয়েছে</item>
+        <item quantity="other">%1$dটি সিঙ্ক হয়েছে</item>
+    </plurals>
 
     <!-- Profile -->
     <string name="profile_connected">সংযুক্ত</string>
     <string name="profile_property">প্রপার্টি</string>
+    <string name="profile_pms_address">PMS ঠিকানা</string>
     <string name="profile_staff">কর্মী</string>
     <string name="profile_key">এপিআই কী</string>
     <string name="profile_edit">সংযোগ সম্পাদনা করুন</string>
+    <string name="profile_version">অ্যাপ সংস্করণ</string>
+    <string name="profile_disconnect">সংযোগ বিচ্ছিন্ন করুন</string>
+    <string name="disconnect_title">PMS থেকে সংযোগ বিচ্ছিন্ন করবেন?</string>
+    <string name="disconnect_copy">এতে সংরক্ষিত কী এবং এই ডিভাইসের সব অফলাইন রুম, টিকিট ও ছবি মুছে যাবে।</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel">রুম হালনাগাদ</string>
+    <string name="notif_morning_title">আজকের রুম</string>
+    <string name="notif_inspect_title">পরিদর্শনের অপেক্ষায় রুম</string>
+    <plurals name="notif_morning_body">
+        <item quantity="one">%1$dটি রুম পরিষ্কার দরকার</item>
+        <item quantity="other">%1$dটি রুম পরিষ্কার দরকার</item>
+    </plurals>
+    <plurals name="notif_inspect_body">
+        <item quantity="one">%1$dটি রুম পরিদর্শনের জন্য প্রস্তুত</item>
+        <item quantity="other">%1$dটি রুম পরিদর্শনের জন্য প্রস্তুত</item>
+    </plurals>
 
     <!-- Common Actions -->
     <string name="action_close">বন্ধ করুন</string>
+    <string name="action_cancel">বাতিল</string>
     <string name="action_retry">আবার চেষ্টা করুন</string>
 
     <!-- Language & Feedback -->

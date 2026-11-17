@@ -392,6 +392,10 @@ class PmsOutboundTransportTest {
 
     override fun localIdFor(serverId: String): String? =
       forward.entries.firstOrNull { it.value == serverId }?.key
+
+    override fun clear() {
+      forward.clear()
+    }
   }
 
   class FakeQueue(private val unsynced: Int = 0) : SyncQueueDao {
@@ -417,6 +421,8 @@ class PmsOutboundTransportTest {
     ): Int = unsynced
 
     override suspend fun pendingCount(): Int = TODO()
+
+    override fun observeFlagged(): Flow<List<SyncMutationEntity>> = TODO()
   }
 
   private class FakeClock : Clock {

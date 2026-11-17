@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -21,19 +22,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import com.vivereply.roomready.R
 import com.vivereply.roomready.data.EngineGraph
 import com.vivereply.roomready.domain.model.StaffMember
@@ -55,11 +60,31 @@ fun ProfileRoute(
   var staff by remember { mutableStateOf<StaffMember?>(null) }
   var maskedKey by remember { mutableStateOf("") }
   var property by remember { mutableStateOf<String?>(null) }
+  var pmsAddress by remember { mutableStateOf<String?>(null) }
+  val context = LocalContext.current
+  val scope = rememberCoroutineScope()
+  val versionName =
+    remember {
+      runCatching {
+        val info =
+          if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            context.packageManager.getPackageInfo(
+              context.packageName,
+              android.content.pm.PackageManager.PackageInfoFlags.of(0),
+            )
+          } else {
+            @Suppress("DEPRECATION")
+            context.packageManager.getPackageInfo(context.packageName, 0)
+          }
+        info.versionName
+      }.getOrNull()
+    }
   LaunchedEffect(Unit) {
     connection.refresh()
     staff = graph.orchestrator.staffIdentity()
     maskedKey = graph.credentials.maskedApiKey()
     property = graph.orchestrator.propertyName()
+    pmsAddress = graph.orchestrator.pmsAddress()
   }
   val lastSyncedText =
     remember(status.lastSyncedAt, languageTag) {
@@ -69,6 +94,8 @@ fun ProfileRoute(
     }
   ProfileScreen(
     propertyName = property,
+    pmsAddress = pmsAddress,
+    versionName = versionName,
     staff = staff,
     maskedKey = maskedKey,
     lastSyncedText = lastSyncedText,
@@ -77,6 +104,12 @@ fun ProfileRoute(
     onLanguageSelected = onLanguageSelected,
     onEditConnection = onEditConnection,
     onSyncNow = { connection.syncNow() },
+    onDisconnect = {
+      scope.launch {
+        graph.disconnect()
+        connection.refresh()
+      }
+    },
     modifier = modifier,
   )
 }
@@ -84,6 +117,8 @@ fun ProfileRoute(
 @Composable
 fun ProfileScreen(
   propertyName: String?,
+  pmsAddress: String?,
+  versionName: String?,
   staff: StaffMember?,
   maskedKey: String,
   lastSyncedText: String?,
@@ -92,11 +127,13 @@ fun ProfileScreen(
   onLanguageSelected: (String) -> Unit,
   onEditConnection: () -> Unit,
   onSyncNow: () -> Unit,
+  onDisconnect: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val colors = RoomReadyThemeTokens.colors
   val spacing = RoomReadyThemeTokens.spacing
   val radius = RoomReadyThemeTokens.radius
+  var confirmDisconnect by remember { mutableStateOf(false) }
 
   Column(
     modifier =
@@ -134,11 +171,19 @@ fun ProfileScreen(
           }
         }
         ProfileRow(label = stringResource(R.string.profile_property), value = propertyName ?: "—")
+        ProfileRow(
+          label = stringResource(R.string.profile_pms_address),
+          value = pmsAddress ?: "—",
+        )
         ProfileRow(label = stringResource(R.string.profile_staff), value = staff?.name ?: "—")
         ProfileRow(label = stringResource(R.string.profile_key), value = maskedKey.ifEmpty { "—" })
         ProfileRow(
           label = stringResource(R.string.sync_last_synced_label),
           value = lastSyncedText ?: stringResource(R.string.sync_never),
+        )
+        ProfileRow(
+          label = stringResource(R.string.profile_version),
+          value = versionName ?: "—",
         )
       }
     }
@@ -165,6 +210,44 @@ fun ProfileScreen(
       shape = RoundedCornerShape(radius.md),
     ) {
       Text(stringResource(R.string.profile_edit))
+    }
+
+    OutlinedButton(
+      onClick = { confirmDisconnect = true },
+      modifier =
+        Modifier.fillMaxWidth().heightIn(min = 52.dp).minimumInteractiveComponentSize()
+          .testTag("profile_disconnect"),
+      shape = RoundedCornerShape(radius.md),
+      colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.statusDirty),
+    ) {
+      Text(stringResource(R.string.profile_disconnect))
+    }
+
+    if (confirmDisconnect) {
+      AlertDialog(
+        onDismissRequest = { confirmDisconnect = false },
+        title = { Text(stringResource(R.string.disconnect_title)) },
+        text = { Text(stringResource(R.string.disconnect_copy)) },
+        confirmButton = {
+          TextButton(
+            onClick = {
+              confirmDisconnect = false
+              onDisconnect()
+            },
+            modifier = Modifier.testTag("profile_disconnect_yes"),
+          ) {
+            Text(
+              text = stringResource(R.string.profile_disconnect),
+              color = colors.statusDirty,
+            )
+          }
+        },
+        dismissButton = {
+          TextButton(onClick = { confirmDisconnect = false }) {
+            Text(stringResource(R.string.action_cancel))
+          }
+        },
+      )
     }
 
     Surface(

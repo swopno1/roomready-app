@@ -698,6 +698,13 @@ class OfflineEngineTest {
 
     override suspend fun pendingCount(): Int =
       store.values.count { it.status == SyncEntryStatus.PENDING }
+
+    override fun observeFlagged(): Flow<List<SyncMutationEntity>> =
+      kotlinx.coroutines.flow.flowOf(
+        store.values
+          .filter { it.status == SyncEntryStatus.PARKED || it.status == SyncEntryStatus.FAILED }
+          .sortedWith(compareByDescending<SyncMutationEntity> { it.updatedAt }.thenByDescending { it.id }),
+      )
   }
 
   private class RecordingTransport(private var failuresBeforeSuccess: Int = 0) : PmsTransport {

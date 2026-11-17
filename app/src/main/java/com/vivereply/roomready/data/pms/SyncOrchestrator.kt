@@ -69,6 +69,8 @@ class SyncOrchestrator(
 
   fun propertyName(): String? = conn.propertyName()
 
+  fun pmsAddress(): String? = conn.baseUrl()?.origin
+
   fun staffIdentity(): StaffMember? = vault.staffIdentity()
 
   suspend fun pendingCount(): Int = queue.pendingCount()

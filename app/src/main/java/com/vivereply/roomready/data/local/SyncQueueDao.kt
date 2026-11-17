@@ -60,4 +60,11 @@ interface SyncQueueDao {
 
   @Query("SELECT COUNT(*) FROM sync_queue WHERE status = 'PENDING'")
   suspend fun pendingCount(): Int
+
+  /** Parked and dead-lettered entries, newest first, for the sync log. */
+  @Query(
+    "SELECT * FROM sync_queue WHERE status IN ('PARKED', 'FAILED') " +
+      "ORDER BY updatedAt DESC, id DESC",
+  )
+  fun observeFlagged(): kotlinx.coroutines.flow.Flow<List<SyncMutationEntity>>
 }

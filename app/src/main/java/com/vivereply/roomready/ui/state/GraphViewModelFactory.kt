@@ -16,7 +16,7 @@ class GraphViewModelFactory(private val graph: EngineGraph) : ViewModelProvider.
       modelClass.isAssignableFrom(BoardViewModel::class.java) ->
         BoardViewModel(graph.rooms, graph.orchestrator) as T
       modelClass.isAssignableFrom(ActivityFeedViewModel::class.java) ->
-        ActivityFeedViewModel(graph.activity) as T
+        ActivityFeedViewModel(graph.activity, graph.database.syncQueueDao()) as T
       modelClass.isAssignableFrom(TicketsViewModel::class.java) ->
         TicketsViewModel(graph.tickets, graph.orchestrator, graph.photos) as T
       else -> throw IllegalArgumentException("Unknown ViewModel ${modelClass.name}")

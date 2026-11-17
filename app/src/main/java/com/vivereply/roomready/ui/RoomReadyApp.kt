@@ -332,7 +332,11 @@ fun RoomReadyApp(
           }
           composable(RoomReadyDestination.Activity.route) {
             if (connected.connected) {
-              ActivityRoute(viewModel = activityFeed, languageTag = currentLanguageTag)
+              ActivityRoute(
+                viewModel = activityFeed,
+                connection = connection,
+                languageTag = currentLanguageTag,
+              )
             } else {
               TabEmptyStateScreen(
                 destination = RoomReadyDestination.Activity,
