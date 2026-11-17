@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
+import android.os.SystemClock
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -32,7 +33,10 @@ class MainActivity : ComponentActivity() {
     registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    installSplashScreen()
+    val splashStart = SystemClock.uptimeMillis()
+    val splash = installSplashScreen()
+    // Let the 800ms mark animation read; cold start usually exceeds this anyway.
+    splash.setKeepOnScreenCondition { SystemClock.uptimeMillis() - splashStart < 800 }
     super.onCreate(savedInstanceState)
 
     // Local daily alarms; posting no-ops until the permission is granted.

@@ -322,6 +322,8 @@ class ExampleRobolectricTest {
     assertNotNull(ContextCompat.getDrawable(context, R.drawable.ic_launcher_foreground))
     assertNotNull(ContextCompat.getDrawable(context, R.drawable.ic_launcher_monochrome))
     assertNotNull(ContextCompat.getDrawable(context, R.drawable.ic_splash_mark))
+    assertNotNull(ContextCompat.getDrawable(context, R.drawable.splash_mark_base))
+    assertNotNull(ContextCompat.getDrawable(context, R.drawable.splash_mark_animated))
     assertNotNull(ContextCompat.getDrawable(context, R.drawable.splash_background_compat))
     assertNotNull(ContextCompat.getDrawable(context, R.mipmap.ic_launcher))
     assertNotNull(ContextCompat.getDrawable(context, R.mipmap.ic_launcher_round))
