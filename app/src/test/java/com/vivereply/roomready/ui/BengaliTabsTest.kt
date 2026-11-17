@@ -2,7 +2,12 @@ package com.vivereply.roomready.ui
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.activity.compose.LocalActivityResultRegistryOwner
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.core.app.ActivityOptionsCompat
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertCountEquals
@@ -30,11 +35,14 @@ import com.vivereply.roomready.domain.model.TicketStatus
 import com.vivereply.roomready.domain.model.TurnoverStep
 import com.vivereply.roomready.ui.navigation.RoomReadyDestination
 import com.vivereply.roomready.ui.screens.ActivityScreen
+import com.vivereply.roomready.data.EngineGraph
+import com.vivereply.roomready.ui.screens.FinishPhotoRoute
 import com.vivereply.roomready.ui.screens.HomeDashboardScreen
 import com.vivereply.roomready.ui.screens.HomeDashboardUiState
 import com.vivereply.roomready.ui.screens.InspectScreen
 import com.vivereply.roomready.ui.screens.InspectUiState
 import com.vivereply.roomready.ui.screens.ProfileScreen
+import com.vivereply.roomready.ui.screens.QrScanScreen
 import com.vivereply.roomready.ui.screens.RoomsBoardScreen
 import com.vivereply.roomready.ui.screens.RoomsBoardUiState
 import com.vivereply.roomready.ui.screens.RoomDetailScreen
@@ -397,6 +405,46 @@ class BengaliTabsTest {
   fun `profile empty state renders fully in Bengali`() =
     checkEmptyState(RoomReadyDestination.Profile)
 
+  @Test
+  fun `qr permission rationale renders fully in Bengali`() {
+    val bn = localizedBn()
+    compose.setContent {
+      CompositionLocalProvider(
+        LocalContext provides bn,
+        LocalConfiguration provides bn.resources.configuration,
+        LocalActivityResultRegistryOwner provides testRegistryOwner,
+      ) {
+        RoomReadyTheme {
+          QrScanScreen(onPairing = {}, onClose = {})
+        }
+      }
+    }
+    compose.onAllNodesWithText(bn.getString(R.string.qr_need_permission)).assertCountEquals(1)
+    compose.onAllNodesWithText(bn.getString(R.string.qr_grant)).assertCountEquals(1)
+  }
+
+  @Test
+  fun `finish permission rationale renders fully in Bengali`() {
+    val bn = localizedBn()
+    compose.setContent {
+      CompositionLocalProvider(
+        LocalContext provides bn,
+        LocalConfiguration provides bn.resources.configuration,
+        LocalActivityResultRegistryOwner provides testRegistryOwner,
+      ) {
+        RoomReadyTheme {
+          FinishPhotoRoute(
+            graph = EngineGraph(ApplicationProvider.getApplicationContext()),
+            onPhotoReady = {},
+            onClose = {},
+          )
+        }
+      }
+    }
+    compose.onAllNodesWithText(bn.getString(R.string.qr_need_permission)).assertCountEquals(1)
+    compose.onAllNodesWithText(bn.getString(R.string.qr_grant)).assertCountEquals(1)
+  }
+
   private fun checkEmptyState(destination: RoomReadyDestination) {
     val bn = localizedBn()
     compose.setContent {
@@ -417,6 +465,21 @@ class BengaliTabsTest {
     compose.onAllNodesWithText(bn.getString(destination.emptyTitleRes)).assertCountEquals(1)
     compose.onAllNodesWithText(bn.getString(destination.emptyActionRes)).assertCountEquals(1)
   }
+
+  private val testRegistryOwner =
+    object : ActivityResultRegistryOwner {
+      override val activityResultRegistry: ActivityResultRegistry =
+        object : ActivityResultRegistry() {
+          override fun <I, O> onLaunch(
+            requestCode: Int,
+            contract: ActivityResultContract<I, O>,
+            input: I,
+            options: ActivityOptionsCompat?,
+          ) {
+            // These tests render the rationale; nothing launches it.
+          }
+        }
+    }
 
   private fun localizedBn(): Context {
     val base = ApplicationProvider.getApplicationContext<Context>()

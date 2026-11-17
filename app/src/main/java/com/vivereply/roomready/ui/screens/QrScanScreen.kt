@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -110,12 +111,15 @@ private fun PermissionRationale(onGrant: () -> Unit, onClose: () -> Unit, modifi
     Spacer(modifier = Modifier.height(spacing.md))
     Button(
       onClick = onGrant,
-      modifier = Modifier.fillMaxWidth().testTag("qr_grant"),
+      modifier = Modifier.minimumInteractiveComponentSize().fillMaxWidth().testTag("qr_grant"),
       colors = ButtonDefaults.buttonColors(containerColor = colors.ink, contentColor = colors.onInk),
     ) {
       Text(stringResource(R.string.qr_grant))
     }
-    OutlinedButton(onClick = onClose, modifier = Modifier.fillMaxWidth()) {
+    OutlinedButton(
+      onClick = onClose,
+      modifier = Modifier.minimumInteractiveComponentSize().fillMaxWidth(),
+    ) {
       Text(stringResource(R.string.action_close))
     }
   }
@@ -159,7 +163,10 @@ private fun CameraScanContent(
           textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(spacing.md))
-        OutlinedButton(onClick = onClose, modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(
+          onClick = onClose,
+          modifier = Modifier.minimumInteractiveComponentSize().fillMaxWidth(),
+        ) {
           Text(stringResource(R.string.action_close))
         }
       }
@@ -240,7 +247,10 @@ private fun CameraScanContent(
         textAlign = TextAlign.Center,
       )
       Spacer(modifier = Modifier.height(spacing.sm))
-      OutlinedButton(onClick = onClose, modifier = Modifier.fillMaxWidth()) {
+      OutlinedButton(
+        onClick = onClose,
+        modifier = Modifier.minimumInteractiveComponentSize().fillMaxWidth(),
+      ) {
         Text(stringResource(R.string.action_close), color = colors.onInk)
       }
     }
