@@ -1,11 +1,15 @@
 package com.vivereply.roomready.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -156,16 +161,23 @@ fun RoomsBoardScreen(
   Column(
     modifier = modifier.fillMaxSize().background(colors.canvas).padding(horizontal = spacing.md),
   ) {
-    SingleChoiceSegmentedButtonRow(
-      modifier = Modifier.fillMaxWidth().padding(vertical = spacing.sm).testTag("board_filters"),
+    // Fixed-width row in a horizontal scroller: five filters + counts never
+    // clip, in English or Bengali, and segments keep connected borders.
+    Row(
+      modifier =
+        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+          .padding(vertical = spacing.sm).testTag("board_filters"),
     ) {
-      BoardFilter.entries.forEachIndexed { index, filter ->
-        SegmentedButton(
-          selected = state.filter == filter,
-          onClick = { onFilter(filter) },
-          shape = SegmentedButtonDefaults.itemShape(index = index, count = BoardFilter.entries.size),
-          modifier = Modifier.minimumInteractiveComponentSize().testTag("filter_${filter.name.lowercase()}"),
-        ) {
+      SingleChoiceSegmentedButtonRow(modifier = Modifier.width(560.dp)) {
+        BoardFilter.entries.forEachIndexed { index, filter ->
+          SegmentedButton(
+            selected = state.filter == filter,
+            onClick = { onFilter(filter) },
+            shape = SegmentedButtonDefaults.itemShape(index = index, count = BoardFilter.entries.size),
+            modifier =
+              Modifier.minimumInteractiveComponentSize()
+                .testTag("filter_${filter.name.lowercase()}"),
+          ) {
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
               text = filterLabel(filter),
@@ -178,6 +190,7 @@ fun RoomsBoardScreen(
               maxLines = 1,
             )
           }
+        }
         }
       }
     }

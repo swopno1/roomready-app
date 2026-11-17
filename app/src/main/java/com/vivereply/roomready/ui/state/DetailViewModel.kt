@@ -58,8 +58,13 @@ class DetailViewModel(
       .map { list -> list.firstOrNull { it.id == unitId } }
       .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-  private val _type = MutableStateFlow<RoomType?>(null)
-  val type: StateFlow<RoomType?> = _type.asStateFlow()
+  // Derived from the unit flow: a one-shot lookup here would race the first
+  // emission and stick at null (first() on a StateFlow never suspends).
+  val type: StateFlow<RoomType?> =
+    unit.map { u ->
+      u?.let { rooms.roomTypes().firstOrNull { t -> t.id == u.roomTypeId } }
+    }
+      .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
   private val tick = MutableStateFlow(0)
 
@@ -106,8 +111,6 @@ class DetailViewModel(
 
   fun refresh() {
     viewModelScope.launch {
-      val current = unit.first()
-      _type.value = current?.let { u -> rooms.roomTypes().firstOrNull { it.id == u.roomTypeId } }
       _role.value = runCatching { orchestrator.staffIdentity()?.role }.getOrNull()
       tick.value += 1
     }
