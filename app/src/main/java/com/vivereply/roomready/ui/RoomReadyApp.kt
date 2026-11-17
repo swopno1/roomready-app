@@ -1,5 +1,8 @@
 package com.vivereply.roomready.ui
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -274,6 +277,10 @@ fun RoomReadyApp(
           navController = navController,
           startDestination = RoomReadyDestination.Home.route,
           modifier = Modifier.fillMaxSize().padding(innerPadding),
+          enterTransition = { fadeIn(animationSpec = tween(150)) },
+          exitTransition = { fadeOut(animationSpec = tween(150)) },
+          popEnterTransition = { fadeIn(animationSpec = tween(150)) },
+          popExitTransition = { fadeOut(animationSpec = tween(150)) },
         ) {
           composable(RoomReadyDestination.Home.route) {
             if (connected.connected) {

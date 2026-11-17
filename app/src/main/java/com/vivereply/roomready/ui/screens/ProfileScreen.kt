@@ -234,7 +234,7 @@ fun ProfileScreen(
               confirmDisconnect = false
               onDisconnect()
             },
-            modifier = Modifier.testTag("profile_disconnect_yes"),
+            modifier = Modifier.minimumInteractiveComponentSize().testTag("profile_disconnect_yes"),
           ) {
             Text(
               text = stringResource(R.string.profile_disconnect),
@@ -243,7 +243,10 @@ fun ProfileScreen(
           }
         },
         dismissButton = {
-          TextButton(onClick = { confirmDisconnect = false }) {
+          TextButton(
+            onClick = { confirmDisconnect = false },
+            modifier = Modifier.minimumInteractiveComponentSize(),
+          ) {
             Text(stringResource(R.string.action_cancel))
           }
         },

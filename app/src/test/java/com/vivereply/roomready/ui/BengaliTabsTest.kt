@@ -16,6 +16,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.vivereply.roomready.R
 import com.vivereply.roomready.domain.model.ActivityEvent
 import com.vivereply.roomready.domain.model.ActivityType
+import com.vivereply.roomready.domain.model.ChecklistProgress
+import com.vivereply.roomready.domain.model.CleaningEvidence
 import com.vivereply.roomready.domain.model.HousekeepingState
 import com.vivereply.roomready.domain.model.Occupancy
 import com.vivereply.roomready.domain.model.RoomType
@@ -25,12 +27,23 @@ import com.vivereply.roomready.domain.model.StaffRole
 import com.vivereply.roomready.domain.model.Ticket
 import com.vivereply.roomready.domain.model.TicketCategory
 import com.vivereply.roomready.domain.model.TicketStatus
+import com.vivereply.roomready.domain.model.TurnoverStep
+import com.vivereply.roomready.ui.navigation.RoomReadyDestination
 import com.vivereply.roomready.ui.screens.ActivityScreen
 import com.vivereply.roomready.ui.screens.HomeDashboardScreen
 import com.vivereply.roomready.ui.screens.HomeDashboardUiState
+import com.vivereply.roomready.ui.screens.InspectScreen
+import com.vivereply.roomready.ui.screens.InspectUiState
 import com.vivereply.roomready.ui.screens.ProfileScreen
 import com.vivereply.roomready.ui.screens.RoomsBoardScreen
 import com.vivereply.roomready.ui.screens.RoomsBoardUiState
+import com.vivereply.roomready.ui.screens.RoomDetailScreen
+import com.vivereply.roomready.ui.screens.RoomDetailUiState
+import com.vivereply.roomready.ui.screens.SetupFormState
+import com.vivereply.roomready.ui.screens.SetupScreen
+import com.vivereply.roomready.ui.screens.TabEmptyStateScreen
+import com.vivereply.roomready.ui.screens.TicketFormScreen
+import com.vivereply.roomready.ui.screens.TicketFormUiState
 import com.vivereply.roomready.ui.screens.TicketsScreen
 import com.vivereply.roomready.ui.state.BoardFilter
 import com.vivereply.roomready.ui.state.SyncStatusUi
@@ -236,6 +249,173 @@ class BengaliTabsTest {
     compose.onAllNodesWithText(bn.getString(R.string.profile_disconnect)).assertCountEquals(1)
     compose.onAllNodesWithText(bn.getString(R.string.profile_version)).assertCountEquals(1)
     compose.onAllNodesWithText(bn.getString(R.string.profile_pms_address)).assertCountEquals(1)
+  }
+
+  @Test
+  fun `setup renders fully in Bengali`() {
+    val bn = localizedBn()
+    compose.setContent {
+      CompositionLocalProvider(
+        LocalContext provides bn,
+        LocalConfiguration provides bn.resources.configuration,
+      ) {
+        RoomReadyTheme {
+          SetupScreen(
+            state = SetupFormState(),
+            onAddressChange = {},
+            onApiKeyChange = {},
+            onStaffNameChange = {},
+            onConnect = {},
+            onScanQr = {},
+            onPasteCode = {},
+          )
+        }
+      }
+    }
+    compose.onAllNodesWithText(bn.getString(R.string.setup_title)).assertCountEquals(1)
+    compose.onAllNodesWithText(bn.getString(R.string.setup_connect)).assertCountEquals(1)
+  }
+
+  @Test
+  fun `detail renders fully in Bengali`() {
+    val bn = localizedBn()
+    compose.setContent {
+      CompositionLocalProvider(
+        LocalContext provides bn,
+        LocalConfiguration provides bn.resources.configuration,
+      ) {
+        RoomReadyTheme {
+          RoomDetailScreen(
+            state =
+              RoomDetailUiState(
+                unit = units[0].copy(hkState = HousekeepingState.CLEANING),
+                typeName = "টেরাকোটা ভিলা",
+                progress = ChecklistProgress("u-101", setOf(TurnoverStep.BED_LINEN)),
+                role = StaffRole.HOUSEKEEPER,
+                nowEpochMillis = 3_661_000L,
+              ),
+            onBack = {},
+            onStart = {},
+            onInspect = {},
+            onSendBack = {},
+            onRaiseTicket = {},
+            onToggleStep = { _, _ -> },
+            onOpenFinish = {},
+            onTakePhoto = {},
+            onRetakePhoto = {},
+            onConfirmFinish = {},
+            onSheetDismiss = {},
+            onFinishDone = {},
+          )
+        }
+      }
+    }
+    compose.onAllNodesWithText(bn.getString(R.string.checklist_step_bed_linen)).assertCountEquals(1)
+    compose.onAllNodesWithText(bn.getString(R.string.checklist_step_final_walkthrough)).assertCountEquals(1)
+  }
+
+  @Test
+  fun `inspect renders fully in Bengali`() {
+    val bn = localizedBn()
+    compose.setContent {
+      CompositionLocalProvider(
+        LocalContext provides bn,
+        LocalConfiguration provides bn.resources.configuration,
+      ) {
+        RoomReadyTheme {
+          InspectScreen(
+            state =
+              InspectUiState(
+                unit = units[0].copy(hkState = HousekeepingState.CLEANED),
+                typeName = "টেরাকোটা ভিলা",
+                progress = ChecklistProgress("u-101", TurnoverStep.entries.toSet()),
+                evidence =
+                  CleaningEvidence(
+                    unitId = "u-101",
+                    photoRef = null,
+                    skipReason = "অন্ধকার",
+                    finishedBy = "আয়েশা",
+                    finishedAtEpochMillis = 1_000L,
+                  ),
+                role = StaffRole.SUPERVISOR,
+              ),
+            onBack = {},
+            onPass = {},
+            onSendBack = {},
+          )
+        }
+      }
+    }
+    compose.onAllNodesWithText(bn.getString(R.string.inspect_checklist)).assertCountEquals(1)
+    compose.onAllNodesWithText(bn.getString(R.string.inspect_pass)).assertCountEquals(1)
+  }
+
+  @Test
+  fun `ticket form renders fully in Bengali`() {
+    val bn = localizedBn()
+    compose.setContent {
+      CompositionLocalProvider(
+        LocalContext provides bn,
+        LocalConfiguration provides bn.resources.configuration,
+      ) {
+        RoomReadyTheme {
+          TicketFormScreen(
+            state = TicketFormUiState(units = units, unitId = "u-101"),
+            onUnit = {},
+            onPickRoom = {},
+            onCategory = {},
+            onNote = {},
+            onAddPhoto = {},
+            onClearPhoto = {},
+            onRaise = {},
+            onBack = {},
+          )
+        }
+      }
+    }
+    compose.onAllNodesWithText(bn.getString(R.string.ticket_new_title)).assertCountEquals(1)
+    compose.onAllNodesWithText(bn.getString(R.string.ticket_category_plumbing)).assertCountEquals(1)
+  }
+
+  @Test
+  fun `home empty state renders fully in Bengali`() =
+    checkEmptyState(RoomReadyDestination.Home)
+
+  @Test
+  fun `rooms empty state renders fully in Bengali`() =
+    checkEmptyState(RoomReadyDestination.Rooms)
+
+  @Test
+  fun `tickets empty state renders fully in Bengali`() =
+    checkEmptyState(RoomReadyDestination.Tickets)
+
+  @Test
+  fun `activity empty state renders fully in Bengali`() =
+    checkEmptyState(RoomReadyDestination.Activity)
+
+  @Test
+  fun `profile empty state renders fully in Bengali`() =
+    checkEmptyState(RoomReadyDestination.Profile)
+
+  private fun checkEmptyState(destination: RoomReadyDestination) {
+    val bn = localizedBn()
+    compose.setContent {
+      CompositionLocalProvider(
+        LocalContext provides bn,
+        LocalConfiguration provides bn.resources.configuration,
+      ) {
+        RoomReadyTheme {
+          TabEmptyStateScreen(
+            destination = destination,
+            currentLanguageTag = "bn",
+            onLanguageSelected = {},
+            onPrimaryAction = {},
+          )
+        }
+      }
+    }
+    compose.onAllNodesWithText(bn.getString(destination.emptyTitleRes)).assertCountEquals(1)
+    compose.onAllNodesWithText(bn.getString(destination.emptyActionRes)).assertCountEquals(1)
   }
 
   private fun localizedBn(): Context {

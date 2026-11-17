@@ -66,6 +66,7 @@ import com.vivereply.roomready.data.EngineGraph
 import com.vivereply.roomready.domain.model.RoomUnit
 import com.vivereply.roomready.domain.model.Ticket
 import com.vivereply.roomready.domain.model.TicketCategory
+import com.vivereply.roomready.ui.components.AllCaughtUp
 import com.vivereply.roomready.ui.components.durationText
 import com.vivereply.roomready.ui.state.BoardViewModel
 import com.vivereply.roomready.ui.state.TicketDraft
@@ -154,12 +155,9 @@ fun TicketsScreen(
         Spacer(modifier = Modifier.height(spacing.sm))
       }
       if (tickets.isEmpty()) {
-        Text(
-          text = stringResource(R.string.tickets_none_after_sync),
-          style = MaterialTheme.typography.bodyMedium,
-          color = colors.inkSecondary,
-          modifier = Modifier.fillMaxWidth(),
-          textAlign = TextAlign.Center,
+        AllCaughtUp(
+          title = stringResource(R.string.home_all_caught_up_title),
+          copy = stringResource(R.string.tickets_none_after_sync),
         )
       } else {
         LazyColumn(
@@ -429,7 +427,7 @@ fun TicketFormScreen(
               selected = state.category == category,
               onClick = { onCategory(category) },
               label = { Text(stringResource(category.labelRes)) },
-              modifier = Modifier.testTag("ticket_cat_${category.name.lowercase()}"),
+              modifier = Modifier.minimumInteractiveComponentSize().testTag("ticket_cat_${category.name.lowercase()}"),
             )
           }
         }
@@ -449,11 +447,14 @@ fun TicketFormScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
           Image(
             bitmap = state.photo,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.photo_preview_cd),
             modifier = Modifier.size(120.dp).clip(RoundedCornerShape(radius.md)),
           )
           Spacer(modifier = Modifier.width(spacing.sm))
-          TextButton(onClick = onClearPhoto, modifier = Modifier.testTag("ticket_photo_clear")) {
+          TextButton(
+            onClick = onClearPhoto,
+            modifier = Modifier.minimumInteractiveComponentSize().testTag("ticket_photo_clear"),
+          ) {
             Text(stringResource(R.string.finish_retake))
           }
         }
@@ -520,7 +521,9 @@ fun RoomPickerDialog(units: List<RoomUnit>, onPick: (RoomUnit) -> Unit, onDismis
         items(units, key = { it.id }) { unit ->
           TextButton(
             onClick = { onPick(unit) },
-            modifier = Modifier.fillMaxWidth().testTag("ticket_room_${unit.id}"),
+            modifier =
+              Modifier.minimumInteractiveComponentSize().fillMaxWidth()
+                .testTag("ticket_room_${unit.id}"),
           ) {
             Text(
               text = unit.number,
@@ -538,7 +541,7 @@ fun RoomPickerDialog(units: List<RoomUnit>, onPick: (RoomUnit) -> Unit, onDismis
     },
     confirmButton = {},
     dismissButton = {
-      TextButton(onClick = onDismiss) {
+      TextButton(onClick = onDismiss, modifier = Modifier.minimumInteractiveComponentSize()) {
         Text(stringResource(R.string.action_close))
       }
     },

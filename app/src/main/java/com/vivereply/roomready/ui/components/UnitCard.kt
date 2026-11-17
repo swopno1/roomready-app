@@ -204,7 +204,9 @@ fun UnitCard(
           TextButton(
             onClick = { onSendBack(unit) },
             enabled = !busy,
-            modifier = Modifier.align(Alignment.End).testTag("unit_sendback_${unit.id}"),
+            modifier =
+              Modifier.minimumInteractiveComponentSize().align(Alignment.End)
+                .testTag("unit_sendback_${unit.id}"),
           ) {
             Text(
               text = stringResource(R.string.action_send_back),

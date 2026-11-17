@@ -263,7 +263,7 @@ fun InspectScreen(
             if (state.evidencePhoto != null) {
               Image(
                 bitmap = state.evidencePhoto,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.photo_preview_cd),
                 contentScale = ContentScale.Crop,
                 modifier =
                   Modifier.fillMaxWidth().height(200.dp).clip(RoundedCornerShape(radius.md))

@@ -15,6 +15,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -163,7 +164,7 @@ fun RoomsBoardScreen(
           selected = state.filter == filter,
           onClick = { onFilter(filter) },
           shape = SegmentedButtonDefaults.itemShape(index = index, count = BoardFilter.entries.size),
-          modifier = Modifier.testTag("filter_${filter.name.lowercase()}"),
+          modifier = Modifier.minimumInteractiveComponentSize().testTag("filter_${filter.name.lowercase()}"),
         ) {
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(

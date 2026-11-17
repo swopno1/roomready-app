@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 internal val ViveReplyInk = Color(0xFF0F172A)
 internal val ViveReplyInkDeep = Color(0xFF091124)
 internal val InkSecondary = Color(0xFF334155)
-internal val InkMuted = Color(0xFF64748B)
+internal val InkMuted = Color(0xFF5F6B80)
 internal val PureWhite = Color(0xFFFFFFFF)
 
 internal val MintStart = Color(0xFF00FF94)

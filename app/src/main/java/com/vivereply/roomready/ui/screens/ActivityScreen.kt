@@ -25,13 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vivereply.roomready.R
 import com.vivereply.roomready.data.local.SyncMutationEntity
+import com.vivereply.roomready.data.sync.SyncEntityType
 import com.vivereply.roomready.domain.model.ActivityEvent
 import com.vivereply.roomready.domain.model.ActivityType
+import com.vivereply.roomready.ui.components.AllCaughtUp
 import com.vivereply.roomready.ui.state.ActivityFeedViewModel
 import com.vivereply.roomready.ui.state.ConnectionViewModel
 import com.vivereply.roomready.ui.state.TodayStats
@@ -131,7 +132,7 @@ fun ActivityScreen(
                   color = colors.statusDirty,
                 )
                 Text(
-                  text = "${entry.entityType} · ${entry.entityId}",
+                  text = syncEntityLabel(entry.entityType),
                   style = MaterialTheme.typography.labelMedium,
                   color = colors.inkMuted,
                   maxLines = 1,
@@ -229,12 +230,9 @@ fun ActivityScreen(
     }
     if (events.isEmpty()) {
       item {
-        Text(
-          text = stringResource(R.string.activity_empty_after_sync),
-          style = MaterialTheme.typography.bodyMedium,
-          color = colors.inkSecondary,
-          modifier = Modifier.fillMaxWidth(),
-          textAlign = TextAlign.Center,
+        AllCaughtUp(
+          title = stringResource(R.string.home_all_caught_up_title),
+          copy = stringResource(R.string.activity_empty_after_sync),
         )
       }
     } else {
@@ -304,6 +302,15 @@ private fun EventCard(event: ActivityEvent, languageTag: String) {
     }
   }
 }
+
+@Composable
+private fun syncEntityLabel(entityType: SyncEntityType): String =
+  when (entityType) {
+    SyncEntityType.UNIT_STATUS -> stringResource(R.string.sync_entity_unit)
+    SyncEntityType.CHECKLIST -> stringResource(R.string.sync_entity_checklist)
+    SyncEntityType.TICKET -> stringResource(R.string.sync_entity_ticket)
+    SyncEntityType.TICKET_STATUS -> stringResource(R.string.sync_entity_ticket_status)
+  }
 
 @Composable
 private fun activityTitle(event: ActivityEvent): String =

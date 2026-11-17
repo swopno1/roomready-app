@@ -170,6 +170,7 @@
     <string name="finish_title">Finish cleaning</string>
     <string name="finish_photo">Add a photo of the finished room</string>
     <string name="finish_take_photo">Take photo</string>
+    <string name="photo_preview_cd">Attached photo</string>
     <string name="finish_retake">Retake</string>
     <string name="finish_use_photo">Use this photo</string>
     <string name="finish_or">or</string>
@@ -241,6 +242,10 @@
         <item quantity="one">%1$d change synced</item>
         <item quantity="other">%1$d changes synced</item>
     </plurals>
+    <string name="sync_entity_unit">Room update</string>
+    <string name="sync_entity_checklist">Checklist</string>
+    <string name="sync_entity_ticket">Ticket</string>
+    <string name="sync_entity_ticket_status">Ticket status</string>
 
     <!-- Profile -->
     <string name="profile_connected">Connected</string>

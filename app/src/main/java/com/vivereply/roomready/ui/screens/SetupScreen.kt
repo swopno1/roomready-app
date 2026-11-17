@@ -238,7 +238,9 @@ fun SetupScreen(
       TextButton(
         onClick = onPasteCode,
         enabled = !state.connecting,
-        modifier = Modifier.align(Alignment.CenterHorizontally).testTag("setup_paste"),
+        modifier =
+          Modifier.minimumInteractiveComponentSize().align(Alignment.CenterHorizontally)
+            .testTag("setup_paste"),
       ) {
         Text(stringResource(R.string.setup_paste_code), style = MaterialTheme.typography.labelLarge)
       }
@@ -279,12 +281,15 @@ private fun PasteCodeDialog(
       }
     },
     confirmButton = {
-      TextButton(onClick = { onApply(text) }, modifier = Modifier.testTag("paste_apply")) {
+      TextButton(
+        onClick = { onApply(text) },
+        modifier = Modifier.minimumInteractiveComponentSize().testTag("paste_apply"),
+      ) {
         Text(stringResource(R.string.setup_paste_apply))
       }
     },
     dismissButton = {
-      TextButton(onClick = onDismiss) {
+      TextButton(onClick = onDismiss, modifier = Modifier.minimumInteractiveComponentSize()) {
         Text(stringResource(R.string.action_close))
       }
     },

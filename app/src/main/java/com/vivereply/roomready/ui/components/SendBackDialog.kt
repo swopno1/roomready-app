@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,13 +48,13 @@ fun SendBackDialog(unit: RoomUnit, onDismiss: () -> Unit, onConfirm: (String) ->
       TextButton(
         onClick = { onConfirm(reason.trim()) },
         enabled = reason.isNotBlank(),
-        modifier = Modifier.testTag("sendback_confirm"),
+        modifier = Modifier.minimumInteractiveComponentSize().testTag("sendback_confirm"),
       ) {
         Text(stringResource(R.string.sendback_confirm))
       }
     },
     dismissButton = {
-      TextButton(onClick = onDismiss) {
+      TextButton(onClick = onDismiss, modifier = Modifier.minimumInteractiveComponentSize()) {
         Text(stringResource(R.string.action_close))
       }
     },

@@ -156,7 +156,7 @@
     <string name="action_err_failed">এটি সম্পন্ন হয়নি। আবার চেষ্টা করুন।</string>
     <!-- Room Detail -->
     <string name="detail_not_found">রুমটি পাওয়া যায়নি।</string>
-    <string name="detail_back">পিছনে</string>
+    <string name="detail_back">পেছনে যান</string>
     <string name="cleaning_for">%1$s ধরে পরিষ্কার চলছে</string>
     <plurals name="checklist_progress">
         <item quantity="one">%1$d/%2$d সম্পন্ন</item>
@@ -170,6 +170,7 @@
     <string name="finish_title">পরিষ্কার শেষ করুন</string>
     <string name="finish_photo">সমাপ্ত রুমের ছবি যোগ করুন</string>
     <string name="finish_take_photo">ছবি তুলুন</string>
+    <string name="photo_preview_cd">সংযুক্ত ছবি</string>
     <string name="finish_retake">আবার তুলুন</string>
     <string name="finish_use_photo">এই ছবিটি ব্যবহার করুন</string>
     <string name="finish_or">অথবা</string>
@@ -241,6 +242,10 @@
         <item quantity="one">%1$dটি সিঙ্ক হয়েছে</item>
         <item quantity="other">%1$dটি সিঙ্ক হয়েছে</item>
     </plurals>
+    <string name="sync_entity_unit">রুম হালনাগাদ</string>
+    <string name="sync_entity_checklist">চেকলিস্ট</string>
+    <string name="sync_entity_ticket">টিকিট</string>
+    <string name="sync_entity_ticket_status">টিকিটের অবস্থা</string>
 
     <!-- Profile -->
     <string name="profile_connected">সংযুক্ত</string>

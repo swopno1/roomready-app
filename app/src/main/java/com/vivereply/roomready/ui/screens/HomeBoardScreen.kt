@@ -413,7 +413,7 @@ private fun HeroChip(state: HousekeepingState, count: Int, onClick: () -> Unit) 
     shape = RoundedCornerShape(radius.pill),
     color = container,
     contentColor = content,
-    modifier = Modifier.testTag("home_chip_${state.name.lowercase()}"),
+    modifier = Modifier.minimumInteractiveComponentSize().testTag("home_chip_${state.name.lowercase()}"),
   ) {
     Text(
       text = "$label $count",

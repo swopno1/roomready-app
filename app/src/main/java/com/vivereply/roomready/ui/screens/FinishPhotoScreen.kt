@@ -205,7 +205,7 @@ private fun FinishPhotoScreen(
       ) {
         Image(
           bitmap = preview!!,
-          contentDescription = null,
+          contentDescription = stringResource(R.string.photo_preview_cd),
           contentScale = ContentScale.Crop,
           modifier = Modifier.size(280.dp).clip(RoundedCornerShape(radius.lg)).testTag("photo_preview"),
         )

@@ -662,11 +662,14 @@ fun FinishSheetContent(
       Row(verticalAlignment = Alignment.CenterVertically) {
         Image(
           bitmap = photo,
-          contentDescription = null,
+          contentDescription = stringResource(R.string.photo_preview_cd),
           modifier = Modifier.size(120.dp).clip(RoundedCornerShape(radius.md)),
         )
         Spacer(modifier = Modifier.width(spacing.sm))
-        TextButton(onClick = onRetakePhoto, modifier = Modifier.testTag("finish_retake")) {
+        TextButton(
+          onClick = onRetakePhoto,
+          modifier = Modifier.minimumInteractiveComponentSize().testTag("finish_retake"),
+        ) {
           Text(stringResource(R.string.finish_retake))
         }
       }
@@ -716,7 +719,7 @@ fun FinishSheetContent(
           selected = reason == label,
           onClick = { reason = if (reason == label) "" else label },
           label = { Text(label) },
-          modifier = Modifier.testTag("finish_preset_$index"),
+          modifier = Modifier.minimumInteractiveComponentSize().testTag("finish_preset_$index"),
         )
       }
     }
