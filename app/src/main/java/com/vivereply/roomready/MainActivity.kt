@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -65,6 +66,10 @@ class MainActivity : ComponentActivity() {
         }
 
       CompositionLocalProvider(
+        // The activity registry backs every permission launcher in the app
+        // (QR scan, finish photo): nav destinations cannot rely on an
+        // entry-scoped owner, so the activity provides it explicitly.
+        LocalActivityResultRegistryOwner provides baseContext,
         LocalContext provides localizedContext,
         LocalConfiguration provides localizedContext.resources.configuration,
       ) {
