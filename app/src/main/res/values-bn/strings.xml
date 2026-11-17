@@ -153,6 +153,37 @@
     <string name="action_err_checklist">আগে চেকলিস্টের ৮টি ধাপ শেষ করুন।</string>
     <string name="action_err_not_allowed">আপনার ভূমিকা থেকে এখানে এটি করা যাবে না।</string>
     <string name="action_err_failed">এটি সম্পন্ন হয়নি। আবার চেষ্টা করুন।</string>
+    <!-- Room Detail -->
+    <string name="detail_not_found">রুমটি পাওয়া যায়নি।</string>
+    <string name="detail_back">পিছনে</string>
+    <string name="cleaning_for">%1$s ধরে পরিষ্কার চলছে</string>
+    <plurals name="checklist_progress">
+        <item quantity="one">%1$d/%2$d সম্পন্ন</item>
+        <item quantity="other">%1$d/%2$d সম্পন্ন</item>
+    </plurals>
+    <string name="detail_evidence_photo">ছবি সংযুক্ত আছে</string>
+    <string name="detail_evidence_reason">ছবি এড়ানো হয়েছে: %1$s</string>
+    <string name="detail_finished_by">শেষ করেছেন %1$s</string>
+
+    <!-- Finish Flow -->
+    <string name="finish_title">পরিষ্কার শেষ করুন</string>
+    <string name="finish_photo">সমাপ্ত রুমের ছবি যোগ করুন</string>
+    <string name="finish_take_photo">ছবি তুলুন</string>
+    <string name="finish_retake">আবার তুলুন</string>
+    <string name="finish_use_photo">এই ছবিটি ব্যবহার করুন</string>
+    <string name="finish_or">অথবা</string>
+    <string name="finish_skip">কারণ দিয়ে এড়িয়ে যান</string>
+    <string name="finish_reason_hint">ছবি নেই কেন?</string>
+    <string name="finish_confirm">শেষ করুন</string>
+    <string name="finish_photo_error">ছবি তোলা যায়নি। আবার চেষ্টা করুন।</string>
+    <string name="finish_success_title">রুম %1$s পরিষ্কার</string>
+    <string name="finish_took">সময় লেগেছে %1$s</string>
+    <string name="finish_done">সম্পন্ন</string>
+    <string name="skip_photo_camera">ক্যামেরা কাজ করছে না</string>
+    <string name="skip_photo_light">ছবির জন্য খুব অন্ধকার</string>
+    <string name="skip_photo_privacy">অতিথি ছবি তুলতে নিষেধ করেছেন</string>
+    <string name="action_err_evidence">শেষ করতে একটি ছবি বা কারণ দিন।</string>
+
     <string name="sendback_title">নোংরা অবস্থায় ফেরত পাঠান</string>
     <string name="sendback_hint">হাউসকিপারের জন্য কারণ</string>
     <string name="sendback_confirm">ফেরত পাঠান</string>

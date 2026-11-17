@@ -4,6 +4,8 @@ import com.vivereply.roomready.data.local.ActivityDao
 import com.vivereply.roomready.data.local.ActivityEntity
 import com.vivereply.roomready.data.local.ChecklistDao
 import com.vivereply.roomready.data.local.ChecklistStepEntity
+import com.vivereply.roomready.data.local.CleaningEvidenceDao
+import com.vivereply.roomready.data.local.CleaningEvidenceEntity
 import com.vivereply.roomready.data.local.RoomTypeDao
 import com.vivereply.roomready.data.local.RoomTypeEntity
 import com.vivereply.roomready.data.local.RoomUnitDao
@@ -31,6 +33,8 @@ import com.vivereply.roomready.domain.model.StaffRole
 import com.vivereply.roomready.domain.model.TicketCategory
 import com.vivereply.roomready.domain.model.TicketStatus
 import com.vivereply.roomready.domain.model.TurnoverStep
+import com.vivereply.roomready.data.repository.RoomActionError
+import com.vivereply.roomready.data.repository.RoomActionException
 import com.vivereply.roomready.domain.state.HkTransitionError
 import com.vivereply.roomready.domain.state.HkTransitionException
 import kotlinx.coroutines.flow.Flow
@@ -47,6 +51,7 @@ class OfflineEngineTest {
   private lateinit var units: FakeRoomUnitDao
   private lateinit var types: FakeRoomTypeDao
   private lateinit var roster: FakeStaffRosterDao
+  private lateinit var evidence: FakeCleaningEvidenceDao
   private lateinit var steps: FakeChecklistDao
   private lateinit var tickets: FakeTicketDao
   private lateinit var activity: FakeActivityDao
@@ -63,12 +68,13 @@ class OfflineEngineTest {
     units = FakeRoomUnitDao()
     types = FakeRoomTypeDao()
     roster = FakeStaffRosterDao()
+    evidence = FakeCleaningEvidenceDao()
     steps = FakeChecklistDao()
     tickets = FakeTicketDao()
     activity = FakeActivityDao()
     queue = FakeSyncQueueDao()
     clock = FakeClock()
-    rooms = RoomRepository(units, types, roster, steps, activity, queue, clock)
+    rooms = RoomRepository(units, types, roster, steps, evidence, activity, queue, clock)
     ticketRepo = TicketRepository(units, tickets, activity, queue, clock)
   }
 
@@ -86,7 +92,7 @@ class OfflineEngineTest {
       }
       assertTrue(rooms.progress("u-101").isComplete)
 
-      assertSuccess(rooms.finishCleaning("u-101", housekeeper))
+      assertSuccess(rooms.finishCleaning("u-101", housekeeper, "finish-101.jpg", null))
       assertEquals(HousekeepingState.CLEANED, rooms.getUnit("u-101")?.hkState)
 
       assertSuccess(rooms.inspect("u-101", supervisor))
@@ -144,7 +150,7 @@ class OfflineEngineTest {
       for (step in TurnoverStep.entries) {
         assertSuccess(rooms.setStepDone("u-101", step, true, housekeeper))
       }
-      assertSuccess(rooms.finishCleaning("u-101", housekeeper))
+      assertSuccess(rooms.finishCleaning("u-101", housekeeper, "finish-101.jpg", null))
       assertSuccess(rooms.inspect("u-101", supervisor))
       assertEquals(Occupancy.OCCUPIED, rooms.getUnit("u-101")?.occupancy)
     }
@@ -157,11 +163,54 @@ class OfflineEngineTest {
       TurnoverStep.entries.dropLast(1).forEach { step ->
         assertSuccess(rooms.setStepDone("u-101", step, true, housekeeper))
       }
-      val result = rooms.finishCleaning("u-101", housekeeper)
+      val result = rooms.finishCleaning("u-101", housekeeper, "p.jpg", null)
       assertTrue(result.isFailure)
       val error = (result.exceptionOrNull() as HkTransitionException).error
       assertEquals(HkTransitionError.ChecklistIncomplete(missingSteps = 1), error)
       assertEquals(HousekeepingState.CLEANING, rooms.getUnit("u-101")?.hkState)
+    }
+
+  @Test
+  fun `finish without photo and without reason is impossible`() =
+    runTest {
+      seedUnit(id = "u-101", number = "101", hk = HousekeepingState.DIRTY)
+      assertSuccess(rooms.startCleaning("u-101", housekeeper))
+      for (step in TurnoverStep.entries) {
+        assertSuccess(rooms.setStepDone("u-101", step, true, housekeeper))
+      }
+
+      listOf(
+        Pair(null, null),
+        Pair("", null),
+        Pair(null, "   "),
+        Pair("  ", " "),
+      ).forEach { (photo, reason) ->
+        val result = rooms.finishCleaning("u-101", housekeeper, photo, reason)
+        assertTrue("photo=$photo reason=$reason must fail", result.isFailure)
+        val error = result.exceptionOrNull() as RoomActionException
+        assertEquals(RoomActionError.MissingEvidence, error.error)
+      }
+      assertEquals(HousekeepingState.CLEANING, rooms.getUnit("u-101")?.hkState)
+
+      assertSuccess(rooms.finishCleaning("u-101", housekeeper, null, "too dark"))
+      assertEquals(HousekeepingState.CLEANED, rooms.getUnit("u-101")?.hkState)
+      assertEquals("too dark", rooms.evidenceFor("u-101")?.skipReason)
+      assertEquals(null, rooms.evidenceFor("u-101")?.photoRef)
+    }
+
+  @Test
+  fun `send back clears finish evidence for the redo`() =
+    runTest {
+      seedUnit(id = "u-101", number = "101", hk = HousekeepingState.DIRTY)
+      assertSuccess(rooms.startCleaning("u-101", housekeeper))
+      for (step in TurnoverStep.entries) {
+        assertSuccess(rooms.setStepDone("u-101", step, true, housekeeper))
+      }
+      assertSuccess(rooms.finishCleaning("u-101", housekeeper, "f.jpg", null))
+      assertEquals("f.jpg", rooms.evidenceFor("u-101")?.photoRef)
+
+      assertSuccess(rooms.sendBack("u-101", supervisor, "dust"))
+      assertEquals(null, rooms.evidenceFor("u-101"))
     }
 
   @Test
@@ -180,13 +229,13 @@ class OfflineEngineTest {
       for (step in TurnoverStep.entries) {
         assertSuccess(rooms.setStepDone("u-101", step, true, housekeeper))
       }
-      assertSuccess(rooms.finishCleaning("u-101", housekeeper))
+      assertSuccess(rooms.finishCleaning("u-101", housekeeper, "finish-101.jpg", null))
       assertSuccess(rooms.sendBack("u-101", supervisor, "dust on shelf"))
 
       assertEquals(HousekeepingState.DIRTY, rooms.getUnit("u-101")?.hkState)
       assertEquals(0, rooms.progress("u-101").doneCount)
       assertSuccess(rooms.startCleaning("u-101", housekeeper))
-      assertTrue(rooms.finishCleaning("u-101", housekeeper).isFailure)
+      assertTrue(rooms.finishCleaning("u-101", housekeeper, "p.jpg", null).isFailure)
     }
 
   @Test
@@ -432,6 +481,20 @@ class OfflineEngineTest {
     }
 
     override suspend fun getAll(): List<StaffRosterEntity> = store.values.sortedBy { it.name }
+  }
+
+  private class FakeCleaningEvidenceDao : CleaningEvidenceDao {
+    private val store = mutableMapOf<String, CleaningEvidenceEntity>()
+
+    override suspend fun upsert(evidence: CleaningEvidenceEntity) {
+      store[evidence.unitId] = evidence
+    }
+
+    override suspend fun getForUnit(unitId: String): CleaningEvidenceEntity? = store[unitId]
+
+    override suspend fun clearUnit(unitId: String) {
+      store.remove(unitId)
+    }
   }
 
   private class FakeChecklistDao : ChecklistDao {

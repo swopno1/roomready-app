@@ -93,6 +93,7 @@ dependencies {
   implementation(libs.androidx.camera.view)
   // Bundled on-device barcode model: scans fully offline, no Play Services fetch.
   implementation(libs.mlkit.barcode.scanning)
+  implementation(libs.androidx.exifinterface)
   implementation(libs.androidx.compose.material.icons.core)
   implementation(libs.androidx.compose.material.icons.extended)
   implementation(libs.androidx.compose.material3)

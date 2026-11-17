@@ -2,4 +2,7 @@
 <full-backup-content>
     <!-- Secrets must never leave the device via backup. -->
     <exclude domain="sharedpref" path="roomready_credentials.xml" />
+    <!-- Local photo files and refs are meaningless on restore. -->
+    <exclude domain="sharedpref" path="roomready_photos.xml" />
+    <exclude domain="file" path="cleaning_photos/" />
 </full-backup-content>

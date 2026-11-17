@@ -50,6 +50,7 @@ fun actionErrorRes(error: Throwable): Int {
     is HkTransitionError.IllegalTransition,
     is RoomActionError.StepsLocked,
     -> R.string.action_err_not_allowed
+    is RoomActionError.MissingEvidence -> R.string.action_err_evidence
     else -> R.string.action_err_failed
   }
 }

@@ -68,6 +68,7 @@ class ConnectedScreensTest {
           onFilterSelected = {},
           onAction = { _, _ -> },
           onSendBack = {},
+          onCardClick = {},
         )
       }
     }
@@ -107,6 +108,7 @@ class ConnectedScreensTest {
           onFilterSelected = {},
           onAction = { _, _ -> },
           onSendBack = {},
+          onCardClick = {},
         )
       }
     }

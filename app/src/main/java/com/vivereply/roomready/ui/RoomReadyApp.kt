@@ -55,6 +55,8 @@ import com.vivereply.roomready.ui.components.RoomReadyLogoLockup
 import com.vivereply.roomready.ui.navigation.RoomReadyDestination
 import com.vivereply.roomready.ui.navigation.RoomReadyRoute
 import com.vivereply.roomready.ui.screens.ActivityRoute
+import com.vivereply.roomready.ui.screens.DetailRoute
+import com.vivereply.roomready.ui.screens.FinishPhotoRoute
 import com.vivereply.roomready.ui.screens.HomeRoute
 import com.vivereply.roomready.ui.screens.ProfileRoute
 import com.vivereply.roomready.ui.screens.QrScanScreen
@@ -65,6 +67,8 @@ import com.vivereply.roomready.ui.screens.TicketsRoute
 import com.vivereply.roomready.ui.state.ActivityFeedViewModel
 import com.vivereply.roomready.ui.state.BoardViewModel
 import com.vivereply.roomready.ui.state.ConnectionViewModel
+import com.vivereply.roomready.ui.state.DetailViewModel
+import com.vivereply.roomready.ui.state.DetailViewModelFactory
 import com.vivereply.roomready.ui.state.GraphViewModelFactory
 import com.vivereply.roomready.ui.state.SetupViewModel
 import com.vivereply.roomready.ui.state.TicketsViewModel
@@ -93,7 +97,9 @@ fun RoomReadyApp(
   val navController = rememberNavController()
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route ?: RoomReadyDestination.Home.route
-  val onFullScreenRoute = currentRoute == RoomReadyRoute.SETUP || currentRoute == RoomReadyRoute.QR_SCAN
+  val onFullScreenRoute =
+    currentRoute == RoomReadyRoute.SETUP || currentRoute == RoomReadyRoute.QR_SCAN ||
+      currentRoute.startsWith("room/")
 
   fun navigateToTab(destination: RoomReadyDestination) {
     navController.navigate(destination.route) {
@@ -275,6 +281,7 @@ fun RoomReadyApp(
                   board.setFilter(filter)
                   navigateToTab(RoomReadyDestination.Rooms)
                 },
+                onOpenDetail = { unitId -> navController.navigate(RoomReadyRoute.room(unitId)) },
               )
             } else {
               TabEmptyStateScreen(
@@ -287,7 +294,12 @@ fun RoomReadyApp(
           }
           composable(RoomReadyDestination.Rooms.route) {
             if (connected.connected) {
-              RoomsRoute(board = board, connection = connection, languageTag = currentLanguageTag)
+              RoomsRoute(
+                board = board,
+                connection = connection,
+                languageTag = currentLanguageTag,
+                onOpenDetail = { unitId -> navController.navigate(RoomReadyRoute.room(unitId)) },
+              )
             } else {
               TabEmptyStateScreen(
                 destination = RoomReadyDestination.Rooms,
@@ -355,6 +367,41 @@ fun RoomReadyApp(
             QrScanScreen(
               onPairing = { pairing ->
                 setup.prefill(pairing)
+                navController.popBackStack()
+              },
+              onClose = { navController.popBackStack() },
+            )
+          }
+          composable(RoomReadyRoute.ROOM_PATTERN) { entry ->
+            val unitId = entry.arguments?.getString("unitId") ?: return@composable
+            val detailVm: DetailViewModel =
+              viewModel(
+                key = "detail_$unitId",
+                factory = remember(graph, unitId) { DetailViewModelFactory(graph, unitId) },
+              )
+            DetailRoute(
+              viewModel = detailVm,
+              graph = graph,
+              languageTag = currentLanguageTag,
+              onTakePhoto = { navController.navigate(RoomReadyRoute.photo(unitId)) },
+              onClose = { navController.popBackStack() },
+            )
+          }
+          composable(RoomReadyRoute.PHOTO_PATTERN) { entry ->
+            val unitId = entry.arguments?.getString("unitId") ?: return@composable
+            // Share the detail screen's ViewModel so the captured photo lands in its state.
+            val detailEntry =
+              remember(entry) { requireNotNull(navController.previousBackStackEntry) }
+            val detailVm: DetailViewModel =
+              viewModel(
+                viewModelStoreOwner = detailEntry,
+                key = "detail_$unitId",
+                factory = remember(graph, unitId) { DetailViewModelFactory(graph, unitId) },
+              )
+            FinishPhotoRoute(
+              graph = graph,
+              onPhotoReady = { file ->
+                detailVm.onPhotoCaptured(file)
                 navController.popBackStack()
               },
               onClose = { navController.popBackStack() },

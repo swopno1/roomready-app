@@ -61,6 +61,7 @@ class ShowcaseScreensTest {
           onFilter = {},
           onAction = { _, _ -> },
           onSendBack = {},
+          onCardClick = {},
           onRetry = {},
         )
       }
@@ -91,6 +92,7 @@ class ShowcaseScreensTest {
           onFilter = {},
           onAction = { _, _ -> },
           onSendBack = {},
+          onCardClick = {},
           onRetry = {},
         )
       }
@@ -111,6 +113,7 @@ class ShowcaseScreensTest {
           onFilter = {},
           onAction = { _, _ -> },
           onSendBack = {},
+          onCardClick = {},
           onRetry = {},
         )
       }
@@ -131,6 +134,7 @@ class ShowcaseScreensTest {
           onFilter = {},
           onAction = { _, _ -> },
           onSendBack = {},
+          onCardClick = {},
           onRetry = { retried = true },
         )
       }
@@ -161,6 +165,7 @@ class ShowcaseScreensTest {
           errorRes = null,
           onAction = { _, _ -> },
           onSendBack = {},
+          onCardClick = {},
         )
       }
     }
@@ -195,6 +200,7 @@ class ShowcaseScreensTest {
         onFilterSelected = {},
         onAction = { _, _ -> },
         onSendBack = {},
+          onCardClick = {},
       )
     }
     compose.onNodeWithTag("home_hero").assertIsDisplayed()
@@ -224,6 +230,7 @@ class ShowcaseScreensTest {
         onFilter = {},
         onAction = { _, _ -> },
         onSendBack = {},
+          onCardClick = {},
         onRetry = {},
       )
     }

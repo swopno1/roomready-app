@@ -86,6 +86,7 @@ fun HomeRoute(
   board: BoardViewModel,
   languageTag: String,
   onFilterSelected: (BoardFilter) -> Unit,
+  onOpenDetail: (String) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val status by connection.status.collectAsStateWithLifecycle()
@@ -122,8 +123,11 @@ fun HomeRoute(
     languageTag = languageTag,
     onSyncNow = { connection.syncNow() },
     onFilterSelected = onFilterSelected,
-    onAction = { action, unit -> board.runAction(action, unit) },
+    onAction = { action, unit ->
+      if (action == UnitAction.FINISH) onOpenDetail(unit.id) else board.runAction(action, unit)
+    },
     onSendBack = { sendBackTarget = it },
+    onCardClick = { onOpenDetail(it.id) },
     modifier = modifier,
   )
   sendBackTarget?.let { unit ->
@@ -147,6 +151,7 @@ fun HomeDashboardScreen(
   onFilterSelected: (BoardFilter) -> Unit,
   onAction: (UnitAction, RoomUnit) -> Unit,
   onSendBack: (RoomUnit) -> Unit,
+  onCardClick: (RoomUnit) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val colors = RoomReadyThemeTokens.colors
@@ -235,6 +240,7 @@ fun HomeDashboardScreen(
           errorRes = state.actionErrors[unit.id],
           onAction = onAction,
           onSendBack = onSendBack,
+          onCardClick = onCardClick,
           modifier = Modifier.padding(horizontal = spacing.md).animateItem(),
         )
       }

@@ -23,6 +23,23 @@ class SyncPayloadsTest {
   }
 
   @Test
+  fun `unit status payload carries finish evidence when present`() {
+    val withEvidence =
+      SyncPayloads.unitStatus("u-1", HousekeepingState.CLEANED, "Ayesha", 1000L, "f.jpg", null)
+    assertTrue(withEvidence.contains("\"photoRef\":\"f.jpg\""))
+    assertTrue(!withEvidence.contains("skipReason"))
+
+    val withReason =
+      SyncPayloads.unitStatus("u-1", HousekeepingState.CLEANED, "Ayesha", 1000L, null, "too dark")
+    assertTrue(withReason.contains("\"skipReason\":\"too dark\""))
+    assertTrue(!withReason.contains("photoRef"))
+
+    val plain = SyncPayloads.unitStatus("u-1", HousekeepingState.DIRTY, "Ayesha", 1000L)
+    assertTrue(!plain.contains("photoRef"))
+    assertTrue(!plain.contains("skipReason"))
+  }
+
+  @Test
   fun `checklist payload carries ordered done keys and complete flag`() {
     val payload =
       SyncPayloads.checklist("u-1", listOf("bed_linen", "vacuum_mop"), false, "Ayesha", 1000L)

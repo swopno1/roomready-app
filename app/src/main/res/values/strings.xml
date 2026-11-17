@@ -153,6 +153,37 @@
     <string name="action_err_checklist">Finish all 8 checklist steps first.</string>
     <string name="action_err_not_allowed">Your role can\'t do that here.</string>
     <string name="action_err_failed">That didn\'t go through. Try again.</string>
+    <!-- Room Detail -->
+    <string name="detail_not_found">Couldn\'t find that room.</string>
+    <string name="detail_back">Back</string>
+    <string name="cleaning_for">Cleaning for %1$s</string>
+    <plurals name="checklist_progress">
+        <item quantity="one">%1$d of %2$d done</item>
+        <item quantity="other">%1$d of %2$d done</item>
+    </plurals>
+    <string name="detail_evidence_photo">Photo attached</string>
+    <string name="detail_evidence_reason">Skipped photo: %1$s</string>
+    <string name="detail_finished_by">Finished by %1$s</string>
+
+    <!-- Finish Flow -->
+    <string name="finish_title">Finish cleaning</string>
+    <string name="finish_photo">Add a photo of the finished room</string>
+    <string name="finish_take_photo">Take photo</string>
+    <string name="finish_retake">Retake</string>
+    <string name="finish_use_photo">Use this photo</string>
+    <string name="finish_or">or</string>
+    <string name="finish_skip">Skip with a reason</string>
+    <string name="finish_reason_hint">Why no photo?</string>
+    <string name="finish_confirm">Finish</string>
+    <string name="finish_photo_error">Couldn\'t take the photo. Try again.</string>
+    <string name="finish_success_title">Room %1$s is clean</string>
+    <string name="finish_took">Took %1$s</string>
+    <string name="finish_done">Done</string>
+    <string name="skip_photo_camera">Camera not working</string>
+    <string name="skip_photo_light">Too dark for a useful photo</string>
+    <string name="skip_photo_privacy">Guest asked for no photos</string>
+    <string name="action_err_evidence">Add a photo or a reason to finish.</string>
+
     <string name="sendback_title">Send back to Dirty</string>
     <string name="sendback_hint">Reason for the housekeeper</string>
     <string name="sendback_confirm">Send back</string>

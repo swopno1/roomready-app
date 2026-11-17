@@ -5,6 +5,8 @@ import com.vivereply.roomready.data.local.ActivityDao
 import com.vivereply.roomready.data.local.ActivityEntity
 import com.vivereply.roomready.data.local.ChecklistDao
 import com.vivereply.roomready.data.local.ChecklistStepEntity
+import com.vivereply.roomready.data.local.CleaningEvidenceDao
+import com.vivereply.roomready.data.local.CleaningEvidenceEntity
 import com.vivereply.roomready.data.local.RoomTypeDao
 import com.vivereply.roomready.data.local.RoomTypeEntity
 import com.vivereply.roomready.data.local.RoomUnitDao
@@ -18,6 +20,7 @@ import com.vivereply.roomready.data.sync.SyncOp
 import com.vivereply.roomready.data.sync.SyncPayloads
 import com.vivereply.roomready.domain.model.ActivityType
 import com.vivereply.roomready.domain.model.ChecklistProgress
+import com.vivereply.roomready.domain.model.CleaningEvidence
 import com.vivereply.roomready.domain.model.HousekeepingState
 import com.vivereply.roomready.domain.model.PmsHousekeeping
 import com.vivereply.roomready.domain.model.RoomType
@@ -34,6 +37,9 @@ sealed interface RoomActionError {
 
   /** Checklist steps can only change while the room is being cleaned. */
   data class StepsLocked(val hkState: HousekeepingState) : RoomActionError
+
+  /** Finishing needs a photo, a skip reason, or both — never neither. */
+  data object MissingEvidence : RoomActionError
 }
 
 class RoomActionException(val error: RoomActionError) : IllegalStateException(error.toString())
@@ -57,6 +63,7 @@ class RoomRepository(
   private val types: RoomTypeDao,
   private val roster: StaffRosterDao,
   private val steps: ChecklistDao,
+  private val evidence: CleaningEvidenceDao,
   private val activity: ActivityDao,
   private val queue: SyncQueueDao,
   private val clock: Clock,
@@ -143,8 +150,17 @@ class RoomRepository(
     return Result.success(current)
   }
 
-  /** HOUSEKEEPER: Cleaning -> Cleaned. Requires all 8 steps done. */
-  suspend fun finishCleaning(unitId: String, actor: StaffMember): Result<RoomUnit> {
+  /**
+   * HOUSEKEEPER: Cleaning -> Cleaned. Requires all 8 steps done plus finish
+   * evidence: a photo ref, a skip reason, or both. Without evidence the
+   * transition is impossible here, not just hidden in UI.
+   */
+  suspend fun finishCleaning(
+    unitId: String,
+    actor: StaffMember,
+    photoRef: String?,
+    skipReason: String?,
+  ): Result<RoomUnit> {
     val unit = units.getById(unitId) ?: return unknownUnit(unitId)
     val current = progress(unitId)
     val now = clock.nowEpochMillis()
@@ -156,11 +172,28 @@ class RoomRepository(
         checklistDone = current.doneCount,
         checklistTotal = current.total,
       ).getOrElse { return Result.failure(it) }
+    val photo = photoRef?.trim()?.ifEmpty { null }
+    val reason = skipReason?.trim()?.ifEmpty { null }
+    if (photo == null && reason == null) {
+      return Result.failure(RoomActionException(RoomActionError.MissingEvidence))
+    }
     units.updateHkState(unitId, next, now)
+    evidence.upsert(
+      CleaningEvidenceEntity(
+        unitId = unitId,
+        photoRef = photo,
+        skipReason = reason,
+        finishedBy = actor.name,
+        finishedAt = now,
+      ),
+    )
     logStatusChange(unit, next, actor, now, detail = null)
-    enqueueStatus(unit, next, actor, now)
+    enqueueStatus(unit, next, actor, now, photoRef = photo, skipReason = reason)
     return Result.success(unit.toDomain().copy(hkState = next, updatedAtEpochMillis = now))
   }
+
+  suspend fun evidenceFor(unitId: String): CleaningEvidence? =
+    evidence.getForUnit(unitId)?.toDomain()
 
   /** SUPERVISOR: Cleaned -> Ready. */
   suspend fun inspect(unitId: String, actor: StaffMember): Result<RoomUnit> {
@@ -176,9 +209,9 @@ class RoomRepository(
   }
 
   /**
-   * SUPERVISOR: Cleaned -> Dirty with a reason. Checklist progress is cleared
-   * so the redo starts fresh; a housekeeper cannot finish without re-doing
-   * all 8 steps.
+   * SUPERVISOR: Cleaned -> Dirty with a reason. Checklist progress and finish
+   * evidence are cleared so the redo starts fresh; a housekeeper cannot
+   * finish without re-doing all 8 steps and re-proving.
    */
   suspend fun sendBack(unitId: String, actor: StaffMember, reason: String): Result<RoomUnit> {
     val unit = units.getById(unitId) ?: return unknownUnit(unitId)
@@ -192,6 +225,7 @@ class RoomRepository(
       ).getOrElse { return Result.failure(it) }
     units.updateHkState(unitId, next, now)
     steps.clearUnit(unitId)
+    evidence.clearUnit(unitId)
     activity.insert(
       ActivityEntity(
         type = ActivityType.SENT_BACK,
@@ -294,13 +328,15 @@ class RoomRepository(
     next: HousekeepingState,
     actor: StaffMember,
     now: Long,
+    photoRef: String? = null,
+    skipReason: String? = null,
   ) {
     queue.enqueue(
       SyncMutationEntity(
         entityType = SyncEntityType.UNIT_STATUS,
         entityId = unit.id,
         op = SyncOp.UPSERT,
-        payloadJson = SyncPayloads.unitStatus(unit.id, next, actor.name, now),
+        payloadJson = SyncPayloads.unitStatus(unit.id, next, actor.name, now, photoRef, skipReason),
         createdAt = now,
         dueAt = now,
         updatedAt = now,

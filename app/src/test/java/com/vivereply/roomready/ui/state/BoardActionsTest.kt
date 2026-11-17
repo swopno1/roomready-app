@@ -81,6 +81,10 @@ class BoardActionsTest {
       R.string.action_err_failed,
       actionErrorRes(RoomActionException(RoomActionError.UnknownUnit("u-1"))),
     )
+    assertEquals(
+      R.string.action_err_evidence,
+      actionErrorRes(RoomActionException(RoomActionError.MissingEvidence)),
+    )
     assertEquals(R.string.action_err_failed, actionErrorRes(RuntimeException("boom")))
   }
 

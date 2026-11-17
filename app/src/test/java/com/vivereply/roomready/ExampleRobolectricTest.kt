@@ -149,6 +149,29 @@ class ExampleRobolectricTest {
         R.string.action_err_checklist,
         R.string.action_err_not_allowed,
         R.string.action_err_failed,
+        R.string.detail_not_found,
+        R.string.detail_back,
+        R.string.cleaning_for,
+        R.string.detail_evidence_photo,
+        R.string.detail_evidence_reason,
+        R.string.detail_finished_by,
+        R.string.finish_title,
+        R.string.finish_photo,
+        R.string.finish_take_photo,
+        R.string.finish_retake,
+        R.string.finish_use_photo,
+        R.string.finish_or,
+        R.string.finish_skip,
+        R.string.finish_reason_hint,
+        R.string.finish_confirm,
+        R.string.finish_photo_error,
+        R.string.finish_success_title,
+        R.string.finish_took,
+        R.string.finish_done,
+        R.string.skip_photo_camera,
+        R.string.skip_photo_light,
+        R.string.skip_photo_privacy,
+        R.string.action_err_evidence,
         R.string.sendback_title,
         R.string.sendback_hint,
         R.string.sendback_confirm,
@@ -201,6 +224,13 @@ class ExampleRobolectricTest {
     )
     assertTrue(
       bnContext.resources.getQuantityString(R.plurals.home_ready_progress, 5, 2, 5).contains("প্রস্তুত"),
+    )
+    assertTrue(
+      enContext.resources.getQuantityString(R.plurals.checklist_progress, 1, 1, 8)
+        .contains("1 of 8 done"),
+    )
+    assertTrue(
+      bnContext.resources.getQuantityString(R.plurals.checklist_progress, 3, 3, 8).contains("সম্পন্ন"),
     )
 
     assertNotEquals(

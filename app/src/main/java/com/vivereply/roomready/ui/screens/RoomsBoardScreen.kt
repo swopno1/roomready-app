@@ -63,6 +63,7 @@ fun RoomsRoute(
   board: BoardViewModel,
   connection: ConnectionViewModel,
   languageTag: String,
+  onOpenDetail: (String) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val units by board.units.collectAsStateWithLifecycle()
@@ -97,8 +98,11 @@ fun RoomsRoute(
       ),
     languageTag = languageTag,
     onFilter = { board.setFilter(it) },
-    onAction = { action, unit -> board.runAction(action, unit) },
+    onAction = { action, unit ->
+      if (action == UnitAction.FINISH) onOpenDetail(unit.id) else board.runAction(action, unit)
+    },
     onSendBack = { sendBackTarget = it },
+    onCardClick = { onOpenDetail(it.id) },
     onRetry = { board.retry() },
     modifier = modifier,
   )
@@ -123,6 +127,7 @@ fun RoomsBoardScreen(
   onFilter: (BoardFilter) -> Unit,
   onAction: (UnitAction, RoomUnit) -> Unit,
   onSendBack: (RoomUnit) -> Unit,
+  onCardClick: (RoomUnit) -> Unit,
   onRetry: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -212,6 +217,7 @@ fun RoomsBoardScreen(
                 errorRes = state.actionErrors[unit.id],
                 onAction = onAction,
                 onSendBack = onSendBack,
+                onCardClick = onCardClick,
                 modifier = Modifier.animateItem(),
               )
             }

@@ -43,6 +43,7 @@ class BootstrapReplayTest {
         db.roomTypeDao(),
         db.staffRosterDao(),
         db.checklistDao(),
+        db.cleaningEvidenceDao(),
         db.activityDao(),
         db.syncQueueDao(),
         FakeClock(),

@@ -55,8 +55,13 @@ import kotlinx.coroutines.delay
 
 /** Compact relative duration: 45m, 5h, 3d. */
 @Composable
-fun timeInStateText(sinceEpochMillis: Long, nowEpochMillis: Long): String {
-  val minutes = ((nowEpochMillis - sinceEpochMillis) / 60_000L).coerceAtLeast(0L)
+fun timeInStateText(sinceEpochMillis: Long, nowEpochMillis: Long): String =
+  durationText(nowEpochMillis - sinceEpochMillis)
+
+/** Formats a millisecond span with the same compact units. */
+@Composable
+fun durationText(totalMillis: Long): String {
+  val minutes = (totalMillis / 60_000L).coerceAtLeast(0L)
   return when {
     minutes < 60L -> stringResource(R.string.time_minutes, minutes.toInt())
     minutes < 2_880L -> stringResource(R.string.time_hours, (minutes / 60L).toInt())
@@ -79,6 +84,7 @@ fun UnitCard(
   errorRes: Int?,
   onAction: (UnitAction, RoomUnit) -> Unit,
   onSendBack: (RoomUnit) -> Unit,
+  onCardClick: (RoomUnit) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val colors = RoomReadyThemeTokens.colors
@@ -103,6 +109,7 @@ fun UnitCard(
   val action = primaryActionFor(unit.hkState, role)
 
   Surface(
+    onClick = { onCardClick(unit) },
     modifier =
       modifier
         .fillMaxWidth()
@@ -147,8 +154,14 @@ fun UnitCard(
             tint = colors.inkMuted,
           )
           Spacer(modifier = Modifier.width(spacing.xxs))
+          val duration = timeInStateText(unit.updatedAtEpochMillis, nowEpochMillis)
           Text(
-            text = timeInStateText(unit.updatedAtEpochMillis, nowEpochMillis),
+            text =
+              if (unit.hkState == HousekeepingState.CLEANING) {
+                stringResource(R.string.cleaning_for, duration)
+              } else {
+                duration
+              },
             style = MaterialTheme.typography.labelMedium,
             color = colors.inkMuted,
           )

@@ -19,14 +19,21 @@ object SyncPayloads {
     hkState: HousekeepingState,
     actorName: String,
     atEpochMillis: Long,
-  ): String =
-    buildJson(
-      "unitId" to unitId,
-      "housekeeping" to PmsHousekeeping.fromLocal(hkState).code,
-      "localState" to hkState.name,
-      "actor" to actorName,
-      "at" to atEpochMillis,
-    )
+    photoRef: String? = null,
+    skipReason: String? = null,
+  ): String {
+    val fields: MutableList<Pair<String, Any?>> =
+      mutableListOf(
+        "unitId" to unitId,
+        "housekeeping" to PmsHousekeeping.fromLocal(hkState).code,
+        "localState" to hkState.name,
+        "actor" to actorName,
+        "at" to atEpochMillis,
+      )
+    if (photoRef != null) fields += "photoRef" to photoRef
+    if (skipReason != null) fields += "skipReason" to skipReason
+    return buildJson(*fields.toTypedArray())
+  }
 
   fun checklist(
     unitId: String,

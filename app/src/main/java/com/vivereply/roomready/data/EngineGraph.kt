@@ -2,6 +2,7 @@ package com.vivereply.roomready.data
 
 import android.content.Context
 import com.vivereply.roomready.data.local.RoomReadyDatabase
+import com.vivereply.roomready.data.photos.PhotoStore
 import com.vivereply.roomready.data.pms.ConnectionPrefs
 import com.vivereply.roomready.data.pms.HttpPmsApi
 import com.vivereply.roomready.data.pms.PmsApi
@@ -27,6 +28,8 @@ class EngineGraph(context: Context, val clock: Clock = SystemClock) {
 
   val conn: ConnectionPrefs by lazy { ConnectionPrefs(appContext) }
 
+  val photos: PhotoStore by lazy { PhotoStore(appContext) }
+
   val pmsApi: PmsApi by lazy { HttpPmsApi() }
 
   val rooms: RoomRepository by lazy {
@@ -35,6 +38,7 @@ class EngineGraph(context: Context, val clock: Clock = SystemClock) {
       database.roomTypeDao(),
       database.staffRosterDao(),
       database.checklistDao(),
+      database.cleaningEvidenceDao(),
       database.activityDao(),
       database.syncQueueDao(),
       clock,
