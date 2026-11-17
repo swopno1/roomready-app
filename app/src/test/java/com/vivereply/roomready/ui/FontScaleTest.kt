@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.Density
 import com.vivereply.roomready.domain.model.ActivityEvent
 import com.vivereply.roomready.domain.model.ActivityType
 import com.vivereply.roomready.domain.model.ChecklistProgress
+import com.vivereply.roomready.domain.model.CleaningEvidence
 import com.vivereply.roomready.domain.model.HousekeepingState
 import com.vivereply.roomready.domain.model.Occupancy
 import com.vivereply.roomready.domain.model.RoomType
@@ -20,14 +21,22 @@ import com.vivereply.roomready.domain.model.Ticket
 import com.vivereply.roomready.domain.model.TicketCategory
 import com.vivereply.roomready.domain.model.TicketStatus
 import com.vivereply.roomready.domain.model.TurnoverStep
+import com.vivereply.roomready.ui.navigation.RoomReadyDestination
 import com.vivereply.roomready.ui.screens.ActivityScreen
 import com.vivereply.roomready.ui.screens.HomeDashboardScreen
 import com.vivereply.roomready.ui.screens.HomeDashboardUiState
+import com.vivereply.roomready.ui.screens.InspectScreen
+import com.vivereply.roomready.ui.screens.InspectUiState
 import com.vivereply.roomready.ui.screens.ProfileScreen
 import com.vivereply.roomready.ui.screens.RoomsBoardScreen
 import com.vivereply.roomready.ui.screens.RoomsBoardUiState
 import com.vivereply.roomready.ui.screens.RoomDetailScreen
 import com.vivereply.roomready.ui.screens.RoomDetailUiState
+import com.vivereply.roomready.ui.screens.SetupFormState
+import com.vivereply.roomready.ui.screens.SetupScreen
+import com.vivereply.roomready.ui.screens.TabEmptyStateScreen
+import com.vivereply.roomready.ui.screens.TicketFormScreen
+import com.vivereply.roomready.ui.screens.TicketFormUiState
 import com.vivereply.roomready.ui.screens.TicketsScreen
 import com.vivereply.roomready.ui.state.BoardFilter
 import com.vivereply.roomready.ui.state.SyncStatusUi
@@ -79,6 +88,22 @@ class FontScaleTest {
   @Test fun `detail survives 1_3x`() = checkDetail(1.3f)
 
   @Test fun `detail survives 1_5x`() = checkDetail(1.5f)
+
+  @Test fun `setup survives 1_3x`() = checkSetup(1.3f)
+
+  @Test fun `setup survives 1_5x`() = checkSetup(1.5f)
+
+  @Test fun `inspect survives 1_3x`() = checkInspect(1.3f)
+
+  @Test fun `inspect survives 1_5x`() = checkInspect(1.5f)
+
+  @Test fun `ticket form survives 1_3x`() = checkTicketForm(1.3f)
+
+  @Test fun `ticket form survives 1_5x`() = checkTicketForm(1.5f)
+
+  @Test fun `empty state survives 1_3x`() = checkEmpty(1.3f)
+
+  @Test fun `empty state survives 1_5x`() = checkEmpty(1.5f)
 
   private fun checkHome(scale: Float) {
     renderAt(scale) {
@@ -229,6 +254,80 @@ class FontScaleTest {
     }
     compose.onNodeWithTag("detail_checklist").assertExists()
     compose.onNodeWithText("Change bed linen").assertExists()
+  }
+
+  private fun checkSetup(scale: Float) {
+    renderAt(scale) {
+      SetupScreen(
+        state = SetupFormState(),
+        onAddressChange = {},
+        onApiKeyChange = {},
+        onStaffNameChange = {},
+        onConnect = {},
+        onScanQr = {},
+        onPasteCode = {},
+      )
+    }
+    compose.onNodeWithText("Connect to your PMS").assertExists()
+    compose.onNodeWithTag("setup_connect").assertExists()
+  }
+
+  private fun checkInspect(scale: Float) {
+    renderAt(scale) {
+      InspectScreen(
+        state =
+          InspectUiState(
+            unit = units[0].copy(hkState = HousekeepingState.CLEANED),
+            typeName = "Terracotta Villa",
+            progress = ChecklistProgress("u-101", TurnoverStep.entries.toSet()),
+            evidence =
+              CleaningEvidence(
+                unitId = "u-101",
+                photoRef = null,
+                skipReason = "Too dark",
+                finishedBy = "Ayesha",
+                finishedAtEpochMillis = 1_000L,
+              ),
+            role = StaffRole.SUPERVISOR,
+          ),
+        onBack = {},
+        onPass = {},
+        onSendBack = {},
+      )
+    }
+    compose.onNodeWithTag("inspect_evidence").assertExists()
+    compose.onNodeWithText("Pass").assertExists()
+  }
+
+  private fun checkTicketForm(scale: Float) {
+    renderAt(scale) {
+      TicketFormScreen(
+        state = TicketFormUiState(units = units, unitId = "u-101"),
+        onUnit = {},
+        onPickRoom = {},
+        onCategory = {},
+        onNote = {},
+        onAddPhoto = {},
+        onClearPhoto = {},
+        onRaise = {},
+        onBack = {},
+      )
+    }
+    compose.onNodeWithText("New ticket").assertExists()
+    compose.onNodeWithTag("ticket_cat_plumbing").assertExists()
+  }
+
+  private fun checkEmpty(scale: Float) {
+    renderAt(scale) {
+      TabEmptyStateScreen(
+        destination = RoomReadyDestination.Profile,
+        currentLanguageTag = "en",
+        onLanguageSelected = {},
+        onPrimaryAction = {},
+      )
+    }
+    compose.onNodeWithText("Set up your housekeeper profile").assertExists()
+    compose.onNodeWithTag("lang_chip_bn").assertExists()
   }
 
   private fun renderAt(scale: Float, content: @Composable () -> Unit) {
