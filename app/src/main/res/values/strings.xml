@@ -102,6 +102,8 @@
     <string name="qr_error_bad_key">The key inside this code isn\'t valid.</string>
 
     <!-- Sync Status -->
+    <string name="sync_parked_no_permission">The PMS refused this — your key doesn\'t have permission for it.</string>
+    <string name="sync_parked_ticket_done_role">Closing a ticket on the PMS needs a supervisor key.</string>
     <string name="sync_last_synced">Last synced: %1$s</string>
     <string name="sync_last_synced_label">Last synced</string>
     <string name="sync_never">Not synced yet</string>

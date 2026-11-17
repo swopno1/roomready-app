@@ -134,4 +134,31 @@ class TicketRepository(
     )
     return Result.success(ticket.toDomain().copy(status = TicketStatus.DONE, updatedAtEpochMillis = now))
   }
+
+  /**
+   * Applies a DONE discovered on the PMS during list reconciliation: the
+   * server's status and done timestamp win. Queues nothing — the server
+   * already knows. Already-DONE rows are a quiet success.
+   */
+  suspend fun applyServerDone(ticketId: String, doneBy: String, doneAt: Long): Result<Ticket> {
+    val ticket = tickets.getById(ticketId)
+      ?: return Result.failure(TicketActionException(TicketActionError.UnknownTicket(ticketId)))
+    if (ticket.status == TicketStatus.DONE) return Result.success(ticket.toDomain())
+    TicketLifecycle.evaluate(ticket.status, TicketStatus.DONE).getOrElse {
+      return Result.failure(it)
+    }
+    tickets.updateStatus(ticketId, TicketStatus.DONE, doneAt)
+    activity.insert(
+      ActivityEntity(
+        type = ActivityType.TICKET_DONE,
+        actorName = doneBy,
+        role = null,
+        unitId = ticket.unitId,
+        roomNumber = ticket.roomNumber,
+        detail = null,
+        createdAt = doneAt,
+      ),
+    )
+    return Result.success(ticket.toDomain().copy(status = TicketStatus.DONE, updatedAtEpochMillis = doneAt))
+  }
 }

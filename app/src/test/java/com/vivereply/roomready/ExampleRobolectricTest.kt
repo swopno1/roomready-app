@@ -114,6 +114,8 @@ class ExampleRobolectricTest {
         R.string.qr_error_missing_field,
         R.string.qr_error_bad_url,
         R.string.qr_error_bad_key,
+        R.string.sync_parked_no_permission,
+        R.string.sync_parked_ticket_done_role,
         R.string.sync_last_synced,
         R.string.sync_last_synced_label,
         R.string.sync_never,

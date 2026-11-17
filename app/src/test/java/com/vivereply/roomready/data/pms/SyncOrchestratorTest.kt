@@ -8,11 +8,20 @@ import com.vivereply.roomready.data.local.RoomReadyDatabase
 import com.vivereply.roomready.data.local.SyncMutationEntity
 import com.vivereply.roomready.data.pms.PmsOutboundTransportTest.FakePmsApi
 import com.vivereply.roomready.data.pms.PmsOutboundTransportTest.FakeStore
+import com.vivereply.roomready.data.pms.PmsOutboundTransportTest.FakeTicketIds
 import com.vivereply.roomready.data.pms.PmsOutboundTransportTest.FakeVault
 import com.vivereply.roomready.data.repository.RoomRepository
+import com.vivereply.roomready.data.repository.TicketRepository
 import com.vivereply.roomready.data.sync.SyncEntityType
 import com.vivereply.roomready.data.sync.SyncOp
+import com.vivereply.roomready.data.sync.SyncPayloads
+import com.vivereply.roomready.domain.model.ActivityType
+import com.vivereply.roomready.domain.model.HousekeepingState
+import com.vivereply.roomready.domain.model.PmsHousekeeping
+import com.vivereply.roomready.domain.model.StaffMember
 import com.vivereply.roomready.domain.model.StaffRole
+import com.vivereply.roomready.domain.model.TicketCategory
+import com.vivereply.roomready.domain.model.TicketStatus
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -31,9 +40,11 @@ class SyncOrchestratorTest {
 
   private lateinit var db: RoomReadyDatabase
   private lateinit var rooms: RoomRepository
+  private lateinit var tickets: TicketRepository
   private lateinit var api: FakePmsApi
   private lateinit var vault: FakeVault
   private lateinit var conn: FakeStore
+  private lateinit var ticketIds: FakeTicketIds
   private lateinit var orchestrator: SyncOrchestrator
 
   @Before
@@ -57,7 +68,28 @@ class SyncOrchestratorTest {
     api = FakePmsApi()
     vault = FakeVault(null, null)
     conn = FakeStore(null)
-    orchestrator = SyncOrchestrator(api, vault, conn, rooms, db.syncQueueDao(), db.activityDao(), FakeClock())
+    ticketIds = FakeTicketIds()
+    tickets =
+      TicketRepository(
+        db.roomUnitDao(),
+        db.ticketDao(),
+        db.activityDao(),
+        db.syncQueueDao(),
+        FakeClock(),
+      )
+    orchestrator =
+      SyncOrchestrator(
+        api,
+        vault,
+        conn,
+        rooms,
+        tickets,
+        db.syncQueueDao(),
+        db.activityDao(),
+        ticketIds,
+        FakeClock(),
+        ::testStrings,
+      )
   }
 
   @After
@@ -163,7 +195,7 @@ class SyncOrchestratorTest {
           entityType = SyncEntityType.UNIT_STATUS,
           entityId = "u-101",
           op = SyncOp.UPSERT,
-          payloadJson = "{}",
+          payloadJson = SyncPayloads.unitStatus("u-101", HousekeepingState.CLEANED, "Ayesha", 1L, null, "too dark"),
           createdAt = 1L,
           dueAt = 1L,
           updatedAt = 1L,
@@ -174,8 +206,133 @@ class SyncOrchestratorTest {
       assertEquals(1, report.delivered)
       assertEquals(0, report.parked)
       assertEquals(0, report.pendingAfter)
-      assertEquals("app:k597:Ayesha", api.pushed.single().actor)
+      assertEquals(false, report.refreshed)
+      val status = api.statusCalls.single()
+      assertEquals("u-101", status.unitId)
+      assertEquals(PmsHousekeeping.DIRTY, status.body.expected)
+      assertEquals(StatusAction.MARK_CLEAN, status.body.action)
+      assertEquals("Ayesha", status.body.staffName)
+      assertEquals("too dark", status.body.note)
       assertEquals(5_000L, conn.lastSyncedAt())
+    }
+
+  @Test
+  fun `sync pull 401 wipes the stored key and keeps the queue`() =
+    runTest {
+      api.bootstrapBody = BOOTSTRAP
+      orchestrator.validateAndConnect("https://pms.demo13.com", "rk.k597.s3cret", "Ayesha").getOrThrow()
+      db.syncQueueDao().enqueue(
+        SyncMutationEntity(
+          entityType = SyncEntityType.UNIT_STATUS,
+          entityId = "u-101",
+          op = SyncOp.UPSERT,
+          payloadJson = SyncPayloads.unitStatus("u-101", HousekeepingState.CLEANED, "Ayesha", 1L),
+          createdAt = 1L,
+          dueAt = 1L,
+          updatedAt = 1L,
+        ),
+      )
+      api.bootstrapError = PmsApiException("GET bootstrap failed", 401)
+
+      val result = orchestrator.syncNow()
+      assertTrue(result.isFailure)
+      assertEquals(PmsError.WrongKey, (result.exceptionOrNull() as PmsException).error)
+      assertFalse(vaultHasKey())
+      assertEquals("https://pms.demo13.com", conn.baseUrl()?.origin)
+      assertEquals(1, db.syncQueueDao().pendingCount())
+      assertFalse(orchestrator.isConnected())
+    }
+
+  @Test
+  fun `drain 401 stops the drain wipes the key and keeps entries queued`() =
+    runTest {
+      api.bootstrapBody = BOOTSTRAP
+      orchestrator.validateAndConnect("https://pms.demo13.com", "rk.k597.s3cret", "Ayesha").getOrThrow()
+      repeat(2) {
+        db.syncQueueDao().enqueue(
+          SyncMutationEntity(
+            entityType = SyncEntityType.UNIT_STATUS,
+            entityId = "u-101",
+            op = SyncOp.UPSERT,
+            payloadJson = SyncPayloads.unitStatus("u-101", HousekeepingState.CLEANED, "Ayesha", 1L),
+            createdAt = 1L,
+            dueAt = 1L,
+            updatedAt = 1L,
+          ),
+        )
+      }
+      api.callError = PmsApiException("POST room status failed", 401)
+
+      val result = orchestrator.syncNow()
+      assertTrue(result.isFailure)
+      assertEquals(PmsError.WrongKey, (result.exceptionOrNull() as PmsException).error)
+      assertFalse(vaultHasKey())
+      assertEquals(2, db.syncQueueDao().pendingCount())
+      assertEquals(1, api.statusAttempts)
+      assertFalse(orchestrator.isConnected())
+    }
+
+  @Test
+  fun `reconcile applies server done without queueing`() =
+    runTest {
+      api.bootstrapBody = BOOTSTRAP
+      orchestrator.validateAndConnect("https://pms.demo13.com", "rk.k597.s3cret", "Ayesha").getOrThrow()
+      val ticket =
+        tickets.raiseTicket(
+          "u-101",
+          TicketCategory.PLUMBING,
+          "leak",
+          null,
+          StaffMember("Ayesha", StaffRole.SUPERVISOR),
+        ).getOrThrow()
+      ticketIds.save(ticket.id, "srv-9")
+      api.ticketLists =
+        mapOf(
+          "DONE" to
+            "[{\"id\":\"srv-9\",\"unitId\":\"u-101\",\"title\":\"Plumbing\",\"status\":\"DONE\"," +
+            "\"doneBy\":\"Rahim\",\"doneAt\":777}]",
+        )
+
+      val report = orchestrator.syncNow().getOrThrow()
+      assertEquals(1, report.delivered)
+
+      val reconciled = tickets.getTicket(ticket.id)!!
+      assertEquals(TicketStatus.DONE, reconciled.status)
+      assertEquals(777L, reconciled.updatedAtEpochMillis)
+      assertTrue(api.updates.isEmpty())
+      val doneEvent = db.activityDao().getRecent(10).single { it.type == ActivityType.TICKET_DONE }
+      assertEquals("Rahim", doneEvent.actorName)
+      assertEquals(777L, doneEvent.createdAt)
+    }
+
+  @Test
+  fun `409 parks and schedules a refresh pull`() =
+    runTest {
+      api.bootstrapBody = BOOTSTRAP
+      orchestrator.validateAndConnect("https://pms.demo13.com", "rk.k597.s3cret", "Ayesha").getOrThrow()
+      db.syncQueueDao().enqueue(
+        SyncMutationEntity(
+          entityType = SyncEntityType.UNIT_STATUS,
+          entityId = "u-101",
+          op = SyncOp.UPSERT,
+          payloadJson = SyncPayloads.unitStatus("u-101", HousekeepingState.CLEANED, "Ayesha", 1L),
+          createdAt = 1L,
+          dueAt = 1L,
+          updatedAt = 1L,
+        ),
+      )
+      api.callError = PmsApiException("POST room status failed", 409)
+
+      val report = orchestrator.syncNow().getOrThrow()
+      assertEquals(1, report.parked)
+      assertEquals(true, report.refreshed)
+      assertEquals(3, api.bootstrapCalls)
+      assertTrue(
+        db.activityDao().getRecent(10).any {
+          it.type == ActivityType.PUSH_PARKED &&
+            (it.detail ?: "").contains("HTTP 409")
+        },
+      )
     }
 
   private fun vaultHasKey(): Boolean = vault.hasApiKey()

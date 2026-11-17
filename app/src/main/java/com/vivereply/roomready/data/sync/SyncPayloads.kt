@@ -21,6 +21,7 @@ object SyncPayloads {
     atEpochMillis: Long,
     photoRef: String? = null,
     skipReason: String? = null,
+    note: String? = null,
   ): String {
     val fields: MutableList<Pair<String, Any?>> =
       mutableListOf(
@@ -32,6 +33,7 @@ object SyncPayloads {
       )
     if (photoRef != null) fields += "photoRef" to photoRef
     if (skipReason != null) fields += "skipReason" to skipReason
+    if (note != null) fields += "note" to note
     return buildJson(*fields.toTypedArray())
   }
 

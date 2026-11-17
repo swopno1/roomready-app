@@ -5,11 +5,14 @@ import com.vivereply.roomready.data.Clock
 import com.vivereply.roomready.data.local.ActivityDao
 import com.vivereply.roomready.data.local.SyncQueueDao
 import com.vivereply.roomready.data.repository.RoomRepository
+import com.vivereply.roomready.data.repository.TicketRepository
 import com.vivereply.roomready.data.sync.SyncEngine
 import com.vivereply.roomready.domain.model.StaffMember
 import com.vivereply.roomready.domain.model.StaffRole
+import com.vivereply.roomready.domain.model.TicketStatus
 import com.vivereply.roomready.security.SecureCredentialStore
 import java.net.UnknownHostException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -30,6 +33,7 @@ data class SyncReport(
   val parked: Int,
   val pendingAfter: Int,
   val warnings: List<BootstrapWarning>,
+  val refreshed: Boolean = false,
 )
 
 /**
@@ -45,9 +49,12 @@ class SyncOrchestrator(
   private val vault: SecureCredentialStore,
   private val conn: ConnectionStore,
   private val rooms: RoomRepository,
+  private val tickets: TicketRepository,
   private val queue: SyncQueueDao,
   private val activity: ActivityDao,
+  private val ticketIds: TicketServerIds,
   private val clock: Clock,
+  private val strings: (Int) -> String,
 ) {
 
   fun isConnected(): Boolean =
@@ -135,6 +142,7 @@ class SyncOrchestrator(
         try {
           api.fetchBootstrap(address, key)
         } catch (e: PmsApiException) {
+          if (e.statusCode == 401) vault.clearApiKey()
           return@withContext Result.failure(PmsException(mapBootstrapError(e), e))
         }
       val parsed =
@@ -150,9 +158,18 @@ class SyncOrchestrator(
       rooms.importRoster(parsed.staff)
       conn.saveLastSyncedAt(clock.nowEpochMillis())
       logWarnings(parsed.warnings)
+      reconcileTickets(address, key)
 
       val engine = SyncEngine(queue, activity, outboundTransport(), clock)
       val drain = engine.drain()
+      if (drain.authRevoked) {
+        vault.clearApiKey()
+        return@withContext Result.failure(PmsException(PmsError.WrongKey))
+      }
+      var refreshed = false
+      if (drain.refreshScheduled) {
+        refreshed = refreshAfterConflict(address, key)
+      }
       Result.success(
         SyncReport(
           roomTypes = import.types,
@@ -161,12 +178,58 @@ class SyncOrchestrator(
           parked = drain.parked,
           pendingAfter = queue.pendingCount(),
           warnings = parsed.warnings,
+          refreshed = refreshed,
         ),
       )
     }
 
+  /**
+   * Reconciles local tickets against both server lists. Server status wins
+   * one way (OPEN -> DONE only; the domain forbids reopening), with the
+   * server's done timestamp. Locally unsynced tickets and remote-only rows
+   * are untouched. Any fetch failure skips reconciliation; the drain still
+   * runs.
+   */
+  private suspend fun reconcileTickets(address: PmsAddress, key: String) {
+    try {
+      val remote =
+        ServerTickets.parseArray(api.fetchTickets(address, key, TicketStatus.OPEN)) +
+          ServerTickets.parseArray(api.fetchTickets(address, key, TicketStatus.DONE))
+      for (ticket in remote) {
+        val localId = ticketIds.localIdFor(ticket.id) ?: continue
+        val local = tickets.getTicket(localId) ?: continue
+        if (local.status == TicketStatus.OPEN && ticket.status == TicketStatus.DONE) {
+          tickets.applyServerDone(localId, ticket.doneBy ?: "PMS", ticket.doneAt ?: clock.nowEpochMillis())
+        }
+      }
+    } catch (cancelled: CancellationException) {
+      throw cancelled
+    } catch (e: Exception) {
+      Log.w(TAG, "ticket reconcile skipped", e)
+    }
+  }
+
+  /**
+   * Re-pulls bootstrap after a 409: the PMS moved since `expected`, so the
+   * server is re-read as the source of truth. Best effort within this sync.
+   */
+  private suspend fun refreshAfterConflict(address: PmsAddress, key: String): Boolean {
+    try {
+      val body = api.fetchBootstrap(address, key)
+      val parsed = BootstrapParser.parse(body, clock.nowEpochMillis()).getOrThrow()
+      rooms.importBootstrap(parsed.roomTypes, parsed.units)
+      rooms.importRoster(parsed.staff)
+      return true
+    } catch (cancelled: CancellationException) {
+      throw cancelled
+    } catch (e: Exception) {
+      Log.w(TAG, "conflict refresh skipped", e)
+      return false
+    }
+  }
+
   private fun outboundTransport(): PmsOutboundTransport =
-    PmsOutboundTransport(api, vault, conn, clock)
+    PmsOutboundTransport(api, vault, conn, queue, ticketIds, strings)
 
   private fun mapBootstrapError(e: PmsApiException): PmsError =
     when {

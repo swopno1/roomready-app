@@ -40,6 +40,15 @@ class SyncPayloadsTest {
   }
 
   @Test
+  fun `unit status payload carries the wire note when present`() {
+    val withNote = SyncPayloads.unitStatus("u-1", HousekeepingState.DIRTY, "Rahim", 1000L, note = "dust")
+    assertTrue(withNote.contains("\"note\":\"dust\""))
+
+    val without = SyncPayloads.unitStatus("u-1", HousekeepingState.DIRTY, "Rahim", 1000L)
+    assertFalse(without.contains("\"note\""))
+  }
+
+  @Test
   fun `checklist payload carries ordered done keys and complete flag`() {
     val payload =
       SyncPayloads.checklist("u-1", listOf("bed_linen", "vacuum_mop"), false, "Ayesha", 1000L)

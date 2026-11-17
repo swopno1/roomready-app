@@ -237,7 +237,7 @@ class RoomRepository(
         createdAt = now,
       ),
     )
-    enqueueStatus(unit, next, actor, now)
+    enqueueStatus(unit, next, actor, now, note = reason.trim())
     return Result.success(unit.toDomain().copy(hkState = next, updatedAtEpochMillis = now))
   }
 
@@ -330,13 +330,14 @@ class RoomRepository(
     now: Long,
     photoRef: String? = null,
     skipReason: String? = null,
+    note: String? = null,
   ) {
     queue.enqueue(
       SyncMutationEntity(
         entityType = SyncEntityType.UNIT_STATUS,
         entityId = unit.id,
         op = SyncOp.UPSERT,
-        payloadJson = SyncPayloads.unitStatus(unit.id, next, actor.name, now, photoRef, skipReason),
+        payloadJson = SyncPayloads.unitStatus(unit.id, next, actor.name, now, photoRef, skipReason, note),
         createdAt = now,
         dueAt = now,
         updatedAt = now,

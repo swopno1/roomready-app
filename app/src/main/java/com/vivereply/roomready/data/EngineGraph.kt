@@ -6,7 +6,9 @@ import com.vivereply.roomready.data.photos.PhotoStore
 import com.vivereply.roomready.data.pms.ConnectionPrefs
 import com.vivereply.roomready.data.pms.HttpPmsApi
 import com.vivereply.roomready.data.pms.PmsApi
+import com.vivereply.roomready.data.pms.PrefsTicketServerIds
 import com.vivereply.roomready.data.pms.SyncOrchestrator
+import com.vivereply.roomready.data.pms.TicketServerIds
 import com.vivereply.roomready.data.repository.ActivityRepository
 import com.vivereply.roomready.data.repository.RoomRepository
 import com.vivereply.roomready.data.repository.TicketRepository
@@ -61,15 +63,20 @@ class EngineGraph(context: Context, val clock: Clock = SystemClock) {
   fun syncEngine(transport: PmsTransport): SyncEngine =
     SyncEngine(database.syncQueueDao(), database.activityDao(), transport, clock)
 
+  val ticketIds: TicketServerIds by lazy { PrefsTicketServerIds(appContext) }
+
   val orchestrator: SyncOrchestrator by lazy {
     SyncOrchestrator(
       pmsApi,
       credentials,
       conn,
       rooms,
+      tickets,
       database.syncQueueDao(),
       database.activityDao(),
+      ticketIds,
       clock,
+      appContext::getString,
     )
   }
 }

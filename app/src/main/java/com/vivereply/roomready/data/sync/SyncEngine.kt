@@ -5,8 +5,10 @@ import com.vivereply.roomready.data.local.ActivityDao
 import com.vivereply.roomready.data.local.ActivityEntity
 import com.vivereply.roomready.data.local.SyncMutationEntity
 import com.vivereply.roomready.data.local.SyncQueueDao
+import com.vivereply.roomready.data.pms.DeferEntryException
 import com.vivereply.roomready.data.pms.PmsApiException
 import com.vivereply.roomready.data.pms.PmsAuthException
+import com.vivereply.roomready.data.pms.PmsRefusedException
 import com.vivereply.roomready.domain.model.ActivityType
 import kotlinx.coroutines.CancellationException
 
@@ -17,9 +19,12 @@ import kotlinx.coroutines.CancellationException
  * is rescheduled with backoff, and all local state stays intact. Local
  * repository actions never call the engine; they only enqueue.
  *
- * A PMS refusal (parkable 4xx, e.g. HTTP 400) parks that entry with its
- * reason and flags it on the activity log; the rest of the batch still
- * syncs. Missing local credentials abort the drain without touching entries.
+ * A PMS refusal parks that entry with its reason and flags it on the
+ * activity log; the rest of the batch still syncs. A 401 stops the whole
+ * drain (the orchestrator wipes the revoked key); a 409 also schedules a
+ * bootstrap refresh. Deferred entries (ticket-done ahead of its create)
+ * return to pending untouched. Missing local credentials abort the drain
+ * without touching entries.
  */
 class SyncEngine(
   private val queue: SyncQueueDao,
@@ -34,6 +39,9 @@ class SyncEngine(
     val failed: Int,
     val parked: Int = 0,
     val authAborted: Boolean = false,
+    val authRevoked: Boolean = false,
+    val refreshScheduled: Boolean = false,
+    val deferred: Int = 0,
   )
 
   suspend fun drain(limit: Int = SyncRetryPolicy.DEFAULT_DRAIN_LIMIT): DrainResult {
@@ -47,6 +55,8 @@ class SyncEngine(
     var rescheduled = 0
     var failed = 0
     var parked = 0
+    var deferred = 0
+    var refreshScheduled = false
     for ((index, entry) in due.withIndex()) {
       val attemptNow = clock.nowEpochMillis()
       try {
@@ -66,14 +76,41 @@ class SyncEngine(
         throw cancelled
       } catch (auth: PmsAuthException) {
         // No entry is at fault: return this and later entries to pending untouched.
-        for (rest in due.drop(index)) {
-          queue.reschedule(rest.id, rest.attempts, attemptNow, attemptNow)
-        }
+        abortBatch(due, index, attemptNow)
         return DrainResult(delivered, rescheduled, failed, parked, authAborted = true)
+      } catch (deferredEntry: DeferEntryException) {
+        // Not a failure: still due now, attempts untouched, retried on a later pass.
+        queue.reschedule(entry.id, entry.attempts, attemptNow, attemptNow)
+        deferred++
+      } catch (refused: PmsRefusedException) {
+        parkDetailed(entry, refused.lastError, refused.flagDetail, attemptNow)
+        parked++
+        if (refused.httpStatus == 409) refreshScheduled = true
       } catch (api: PmsApiException) {
+        if (api.statusCode == 401) {
+          // Key wrong or revoked: stop everything, keep every entry queued.
+          abortBatch(due, index, attemptNow)
+          return DrainResult(
+            delivered,
+            rescheduled,
+            failed,
+            parked,
+            authRevoked = true,
+            refreshScheduled = refreshScheduled,
+            deferred = deferred,
+          )
+        }
         if (api.parkable()) {
-          parkRefused(entry, api, attemptNow)
+          // Fallback for transports that throw raw API errors (tests).
+          val reason = "HTTP ${api.statusCode}"
+          parkDetailed(
+            entry,
+            reason,
+            "${entry.entityType} ${entry.entityId} $reason",
+            attemptNow,
+          )
           parked++
+          if (api.statusCode == 409) refreshScheduled = true
         } else {
           if (retryOrFail(entry, attemptNow)) rescheduled++ else failed++
         }
@@ -95,7 +132,24 @@ class SyncEngine(
         ),
       )
     }
-    return DrainResult(delivered, rescheduled, failed, parked)
+    return DrainResult(
+      delivered,
+      rescheduled,
+      failed,
+      parked,
+      refreshScheduled = refreshScheduled,
+      deferred = deferred,
+    )
+  }
+
+  private suspend fun abortBatch(
+    due: List<SyncMutationEntity>,
+    index: Int,
+    now: Long,
+  ) {
+    for (rest in due.drop(index)) {
+      queue.reschedule(rest.id, rest.attempts, now, now)
+    }
   }
 
   /** Returns true when rescheduled, false when moved to FAILED. */
@@ -110,9 +164,13 @@ class SyncEngine(
     }
   }
 
-  private suspend fun parkRefused(entry: SyncMutationEntity, api: PmsApiException, now: Long) {
-    val reason = "HTTP ${api.statusCode}"
-    queue.park(entry.id, reason, now)
+  private suspend fun parkDetailed(
+    entry: SyncMutationEntity,
+    lastError: String,
+    flagDetail: String,
+    now: Long,
+  ) {
+    queue.park(entry.id, lastError, now)
     activity.insert(
       ActivityEntity(
         type = ActivityType.PUSH_PARKED,
@@ -120,7 +178,7 @@ class SyncEngine(
         role = null,
         unitId = entry.unitIdOrNull(),
         roomNumber = null,
-        detail = "${entry.entityType} ${entry.entityId} $reason",
+        detail = flagDetail,
         createdAt = now,
       ),
     )

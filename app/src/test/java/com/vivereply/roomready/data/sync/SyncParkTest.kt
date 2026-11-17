@@ -5,9 +5,21 @@ import com.vivereply.roomready.data.local.ActivityDao
 import com.vivereply.roomready.data.local.ActivityEntity
 import com.vivereply.roomready.data.local.SyncMutationEntity
 import com.vivereply.roomready.data.local.SyncQueueDao
+import com.vivereply.roomready.data.pms.DeferEntryException
+import com.vivereply.roomready.data.pms.PmsAddress
 import com.vivereply.roomready.data.pms.PmsApiException
 import com.vivereply.roomready.data.pms.PmsAuthException
+import com.vivereply.roomready.data.pms.PmsOutboundTransport
+import com.vivereply.roomready.data.pms.PmsOutboundTransportTest.FakePmsApi
+import com.vivereply.roomready.data.sync.SyncPayloads
+import com.vivereply.roomready.data.pms.PmsOutboundTransportTest.FakeStore
+import com.vivereply.roomready.data.pms.PmsOutboundTransportTest.FakeTicketIds
+import com.vivereply.roomready.data.pms.PmsOutboundTransportTest.FakeVault
+import com.vivereply.roomready.data.pms.testStrings
 import com.vivereply.roomready.domain.model.ActivityType
+import com.vivereply.roomready.domain.model.HousekeepingState
+import com.vivereply.roomready.domain.model.StaffMember
+import com.vivereply.roomready.domain.model.StaffRole
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -15,7 +27,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+/** Robolectric: the legacy-entry test drains through the real JSON-mapping transport. */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [36])
 class SyncParkTest {
 
   private lateinit var queue: FakeQueue
@@ -76,6 +94,99 @@ class SyncParkTest {
     }
 
   @Test
+  fun `a 401 stops the drain keeps entries queued and flags revocation`() =
+    runTest {
+      val first = enqueue(SyncEntityType.UNIT_STATUS, "u-101")
+      val second = enqueue(SyncEntityType.UNIT_STATUS, "u-102")
+      val engine = SyncEngine(queue, activity, ScriptedTransport(failWith = mapOf(first to 401, second to 401)), clock)
+
+      val result = engine.drain()
+      assertTrue(result.authRevoked)
+      assertEquals(0, result.delivered)
+      assertEquals(0, result.parked)
+      assertEquals(2, queue.pendingCount())
+      assertEquals(0, pendingAttempts(first))
+      assertEquals(0, pendingAttempts(second))
+    }
+
+  @Test
+  fun `a 409 parks and schedules a refresh`() =
+    runTest {
+      val bad = enqueue(SyncEntityType.UNIT_STATUS, "u-101")
+      val engine = SyncEngine(queue, activity, ScriptedTransport(failWith = mapOf(bad to 409)), clock)
+
+      val result = engine.drain()
+      assertEquals(1, result.parked)
+      assertTrue(result.refreshScheduled)
+      assertEquals(SyncEntryStatus.PARKED, queue.statusOf(bad))
+    }
+
+  @Test
+  fun `a 404 parks and flags while a later entry still delivers`() =
+    runTest {
+      val bad = enqueue(SyncEntityType.TICKET, "t-ghost")
+      val good = enqueue(SyncEntityType.UNIT_STATUS, "u-101")
+      val engine = SyncEngine(queue, activity, ScriptedTransport(failWith = mapOf(bad to 404)), clock)
+
+      val result = engine.drain()
+      assertEquals(1, result.parked)
+      assertEquals(1, result.delivered)
+      assertEquals(SyncEntryStatus.PARKED, queue.statusOf(bad))
+      assertEquals(null, queue.statusOf(good))
+      val flag = activity.events.single { it.type == ActivityType.PUSH_PARKED }
+      assertTrue(flag.detail?.contains("t-ghost") == true)
+      assertTrue(flag.detail?.contains("HTTP 404") == true)
+    }
+
+  @Test
+  fun `legacy r3 entry parks visibly and the drain completes`() =
+    runTest {
+      val legacy = enqueue(SyncEntityType.UNIT_STATUS, "u-legacy", "{}")
+      val good =
+        enqueue(
+          SyncEntityType.UNIT_STATUS,
+          "u-101",
+          SyncPayloads.unitStatus("u-101", HousekeepingState.CLEANED, "Ayesha", 1L),
+        )
+      val api = FakePmsApi()
+      val transport =
+        PmsOutboundTransport(
+          api,
+          FakeVault("rk.k1.s", StaffMember("Ayesha", StaffRole.HOUSEKEEPER)),
+          FakeStore(PmsAddress("https://pms.demo13.com")),
+          queue,
+          FakeTicketIds(),
+          ::testStrings,
+        )
+      val engine = SyncEngine(queue, activity, transport, clock)
+
+      val result = engine.drain()
+      assertEquals(1, result.parked)
+      assertEquals(1, result.delivered)
+      assertEquals(SyncEntryStatus.PARKED, queue.statusOf(legacy))
+      assertEquals("UNTRANSLATABLE", queue.errorOf(legacy))
+      assertEquals(null, queue.statusOf(good))
+      assertEquals(1, api.statusCalls.size)
+      val flag = activity.events.single { it.type == ActivityType.PUSH_PARKED }
+      assertTrue(flag.detail?.contains("UNTRANSLATABLE") == true)
+    }
+
+  @Test
+  fun `a deferred entry returns to pending untouched`() =
+    runTest {
+      val id = enqueue(SyncEntityType.TICKET_STATUS, "local-1")
+      val engine = SyncEngine(queue, activity, DeferringTransport(), clock)
+
+      val result = engine.drain()
+      assertEquals(1, result.deferred)
+      assertEquals(0, result.parked)
+      assertEquals(0, result.rescheduled)
+      assertEquals(SyncEntryStatus.PENDING, queue.statusOf(id))
+      assertEquals(0, pendingAttempts(id))
+      assertEquals(1, queue.pendingCount())
+    }
+
+  @Test
   fun `missing credentials abort the drain without touching entries`() =
     runTest {
       val first = enqueue(SyncEntityType.UNIT_STATUS, "u-101")
@@ -90,13 +201,19 @@ class SyncParkTest {
       assertEquals(SyncEntryStatus.PENDING, queue.statusOf(second))
     }
 
-  private suspend fun enqueue(type: SyncEntityType, entityId: String): Long =
+  private fun pendingAttempts(id: Long): Int? = queue.attemptsOf(id)
+
+  private suspend fun enqueue(
+    type: SyncEntityType,
+    entityId: String,
+    payloadJson: String = "{}",
+  ): Long =
     queue.enqueue(
       SyncMutationEntity(
         entityType = type,
         entityId = entityId,
         op = SyncOp.UPSERT,
-        payloadJson = "{}",
+        payloadJson = payloadJson,
         createdAt = clock.now,
         dueAt = clock.now,
         updatedAt = clock.now,
@@ -118,6 +235,8 @@ class SyncParkTest {
     fun statusOf(id: Long): SyncEntryStatus? = store[id]?.status
 
     fun errorOf(id: Long): String? = store[id]?.lastError
+
+    fun attemptsOf(id: Long): Int? = store[id]?.attempts
 
     override suspend fun enqueue(mutation: SyncMutationEntity): Long {
       val id = nextId++
@@ -186,7 +305,13 @@ class SyncParkTest {
   private class ScriptedTransport(private val failWith: Map<Long, Int>) : PmsTransport {
     override suspend fun send(mutation: OutgoingMutation) {
       val code = failWith[mutation.queueId] ?: return
-      throw PmsApiException("POST outbound failed", code)
+      throw PmsApiException("wire call failed", code)
+    }
+  }
+
+  private class DeferringTransport : PmsTransport {
+    override suspend fun send(mutation: OutgoingMutation) {
+      throw DeferEntryException()
     }
   }
 

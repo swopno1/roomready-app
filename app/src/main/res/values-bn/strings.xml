@@ -102,6 +102,8 @@
     <string name="qr_error_bad_key">কোডের ভেতরের কী-টি সঠিক নয়।</string>
 
     <!-- Sync Status -->
+    <string name="sync_parked_no_permission">PMS এটি প্রত্যাখ্যান করেছে — আপনার কী-এর অনুমতি নেই।</string>
+    <string name="sync_parked_ticket_done_role">PMS-এ টিকিট বন্ধ করতে সুপারভাইজার কী দরকার।</string>
     <string name="sync_last_synced">সর্বশেষ সিঙ্ক: %1$s</string>
     <string name="sync_last_synced_label">সর্বশেষ সিঙ্ক</string>
     <string name="sync_never">এখনো সিঙ্ক হয়নি</string>
