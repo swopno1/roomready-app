@@ -27,7 +27,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -67,6 +66,7 @@ import com.vivereply.roomready.domain.model.RoomUnit
 import com.vivereply.roomready.domain.model.Ticket
 import com.vivereply.roomready.domain.model.TicketCategory
 import com.vivereply.roomready.ui.components.AllCaughtUp
+import com.vivereply.roomready.ui.components.RoomReadyIcons
 import com.vivereply.roomready.ui.components.durationText
 import com.vivereply.roomready.ui.state.BoardViewModel
 import com.vivereply.roomready.ui.state.TicketDraft
@@ -467,7 +467,7 @@ fun TicketFormScreen(
           shape = RoundedCornerShape(radius.md),
         ) {
           Icon(
-            imageVector = Icons.Rounded.PhotoCamera,
+            imageVector = RoomReadyIcons.PhotoCamera,
             contentDescription = null,
             modifier = Modifier.size(20.dp),
           )

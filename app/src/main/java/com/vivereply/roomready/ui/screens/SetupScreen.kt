@@ -15,8 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -47,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vivereply.roomready.R
 import com.vivereply.roomready.data.pms.PmsError
 import com.vivereply.roomready.data.pms.QrError
+import com.vivereply.roomready.ui.components.RoomReadyIcons
 import com.vivereply.roomready.ui.state.SetupViewModel
 import com.vivereply.roomready.ui.theme.RoomReadyThemeTokens
 
@@ -227,7 +226,7 @@ fun SetupScreen(
         shape = RoundedCornerShape(radius.md),
       ) {
         Icon(
-          imageVector = Icons.Rounded.QrCodeScanner,
+          imageVector = RoomReadyIcons.QrCodeScanner,
           contentDescription = null,
           modifier = Modifier.size(20.dp),
         )

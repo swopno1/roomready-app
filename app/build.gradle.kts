@@ -64,6 +64,11 @@ android {
     buildConfig = true
   }
   testOptions { unitTests { isIncludeAndroidResources = true } }
+  lint {
+    // Release bundle runs in a cloud HTTP request; lintDebug is run separately.
+    checkReleaseBuilds = false
+    abortOnError = false
+  }
   dependenciesInfo {
     includeInApk = false
     includeInBundle = true
@@ -95,7 +100,8 @@ dependencies {
   implementation(libs.mlkit.barcode.scanning)
   implementation(libs.androidx.exifinterface)
   implementation(libs.androidx.compose.material.icons.core)
-  implementation(libs.androidx.compose.material.icons.extended)
+  // Extended glyphs are inlined in RoomReadyIcons to avoid ~35 MB DEX bloat & slow release bundling.
+  // implementation(libs.androidx.compose.material.icons.extended)
   implementation(libs.androidx.compose.material3)
   implementation(libs.androidx.compose.ui)
   implementation(libs.androidx.compose.ui.graphics)

@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.WifiOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -33,6 +31,7 @@ import com.vivereply.roomready.data.sync.SyncEntityType
 import com.vivereply.roomready.domain.model.ActivityEvent
 import com.vivereply.roomready.domain.model.ActivityType
 import com.vivereply.roomready.ui.components.AllCaughtUp
+import com.vivereply.roomready.ui.components.RoomReadyIcons
 import com.vivereply.roomready.ui.state.ActivityFeedViewModel
 import com.vivereply.roomready.ui.state.ConnectionViewModel
 import com.vivereply.roomready.ui.state.TodayStats
@@ -161,7 +160,7 @@ fun ActivityScreen(
             verticalAlignment = Alignment.CenterVertically,
           ) {
             Icon(
-              imageVector = Icons.Rounded.WifiOff,
+              imageVector = RoomReadyIcons.WifiOff,
               contentDescription = null,
               tint = colors.statusCleaned,
             )

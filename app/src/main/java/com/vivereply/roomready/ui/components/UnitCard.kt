@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -148,7 +146,7 @@ fun UnitCard(
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
           Icon(
-            imageVector = Icons.Rounded.Schedule,
+            imageVector = RoomReadyIcons.Schedule,
             contentDescription = null,
             modifier = Modifier.size(16.dp),
             tint = colors.inkMuted,

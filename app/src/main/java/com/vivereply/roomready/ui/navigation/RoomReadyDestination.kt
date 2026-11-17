@@ -2,18 +2,13 @@ package com.vivereply.roomready.ui.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ConfirmationNumber
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MeetingRoom
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.ConfirmationNumber
-import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.MeetingRoom
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.vivereply.roomready.R
+import com.vivereply.roomready.ui.components.RoomReadyIcons
 
 enum class RoomReadyDestination(
   val route: String,
@@ -38,8 +33,8 @@ enum class RoomReadyDestination(
   Rooms(
     route = "rooms",
     labelRes = R.string.nav_rooms,
-    selectedIcon = Icons.Filled.MeetingRoom,
-    unselectedIcon = Icons.Outlined.MeetingRoom,
+    selectedIcon = RoomReadyIcons.MeetingRoomFilled,
+    unselectedIcon = RoomReadyIcons.MeetingRoomOutlined,
     emptyTitleRes = R.string.empty_rooms_title,
     emptyCopyRes = R.string.empty_rooms_copy,
     emptyActionRes = R.string.empty_rooms_action,
@@ -48,8 +43,8 @@ enum class RoomReadyDestination(
   Tickets(
     route = "tickets",
     labelRes = R.string.nav_tickets,
-    selectedIcon = Icons.Filled.ConfirmationNumber,
-    unselectedIcon = Icons.Outlined.ConfirmationNumber,
+    selectedIcon = RoomReadyIcons.ConfirmationNumberFilled,
+    unselectedIcon = RoomReadyIcons.ConfirmationNumberOutlined,
     emptyTitleRes = R.string.empty_tickets_title,
     emptyCopyRes = R.string.empty_tickets_copy,
     emptyActionRes = R.string.empty_tickets_action,
@@ -58,8 +53,8 @@ enum class RoomReadyDestination(
   Activity(
     route = "activity",
     labelRes = R.string.nav_activity,
-    selectedIcon = Icons.Filled.History,
-    unselectedIcon = Icons.Outlined.History,
+    selectedIcon = RoomReadyIcons.History,
+    unselectedIcon = RoomReadyIcons.History,
     emptyTitleRes = R.string.empty_activity_title,
     emptyCopyRes = R.string.empty_activity_copy,
     emptyActionRes = R.string.empty_activity_action,

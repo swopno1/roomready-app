@@ -28,7 +28,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -76,6 +75,7 @@ import com.vivereply.roomready.domain.model.HousekeepingState
 import com.vivereply.roomready.domain.model.RoomUnit
 import com.vivereply.roomready.domain.model.StaffRole
 import com.vivereply.roomready.domain.model.TurnoverStep
+import com.vivereply.roomready.ui.components.RoomReadyIcons
 import com.vivereply.roomready.ui.components.SendBackDialog
 import com.vivereply.roomready.ui.components.StatusChip
 import com.vivereply.roomready.ui.components.durationText
@@ -682,7 +682,7 @@ fun FinishSheetContent(
         shape = RoundedCornerShape(radius.md),
       ) {
         Icon(
-          imageVector = Icons.Rounded.PhotoCamera,
+          imageVector = RoomReadyIcons.PhotoCamera,
           contentDescription = null,
           modifier = Modifier.size(20.dp),
         )
