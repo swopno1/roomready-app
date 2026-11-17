@@ -7,6 +7,7 @@ import com.vivereply.roomready.data.local.ChecklistDao
 import com.vivereply.roomready.data.local.ChecklistStepEntity
 import com.vivereply.roomready.data.local.CleaningEvidenceDao
 import com.vivereply.roomready.data.local.CleaningEvidenceEntity
+import com.vivereply.roomready.data.local.RoomReadyDatabase
 import com.vivereply.roomready.data.local.RoomTypeDao
 import com.vivereply.roomready.data.local.RoomTypeEntity
 import com.vivereply.roomready.data.local.RoomUnitDao
@@ -18,6 +19,7 @@ import com.vivereply.roomready.data.local.SyncQueueDao
 import com.vivereply.roomready.data.sync.SyncEntityType
 import com.vivereply.roomready.data.sync.SyncOp
 import com.vivereply.roomready.data.sync.SyncPayloads
+import androidx.room.withTransaction
 import com.vivereply.roomready.domain.model.ActivityType
 import com.vivereply.roomready.domain.model.ChecklistProgress
 import com.vivereply.roomready.domain.model.CleaningEvidence
@@ -67,6 +69,8 @@ class RoomRepository(
   private val activity: ActivityDao,
   private val queue: SyncQueueDao,
   private val clock: Clock,
+  /** Present in production; lets multi-statement imports run in one transaction. */
+  private val database: RoomReadyDatabase? = null,
 ) {
 
   fun observeUnits(): Flow<List<RoomUnit>> =
@@ -255,6 +259,17 @@ class RoomRepository(
     roomTypes: List<RoomType>,
     roomUnits: List<RoomUnit>,
     actorName: String = SYSTEM_ACTOR,
+  ): BootstrapImportResult {
+    if (database != null) {
+      return database.withTransaction { doImportBootstrap(roomTypes, roomUnits, actorName) }
+    }
+    return doImportBootstrap(roomTypes, roomUnits, actorName)
+  }
+
+  private suspend fun doImportBootstrap(
+    roomTypes: List<RoomType>,
+    roomUnits: List<RoomUnit>,
+    actorName: String,
   ): BootstrapImportResult {
     types.upsertAll(roomTypes.map(RoomTypeEntity::fromDomain))
     var preserved = 0

@@ -47,6 +47,7 @@ class BootstrapReplayTest {
         db.activityDao(),
         db.syncQueueDao(),
         FakeClock(),
+        db,
       )
   }
 

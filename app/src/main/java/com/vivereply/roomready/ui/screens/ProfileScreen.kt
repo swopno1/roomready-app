@@ -38,7 +38,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.vivereply.roomready.R
 import com.vivereply.roomready.data.EngineGraph
 import com.vivereply.roomready.domain.model.StaffMember
@@ -81,10 +83,13 @@ fun ProfileRoute(
     }
   LaunchedEffect(Unit) {
     connection.refresh()
-    staff = graph.orchestrator.staffIdentity()
-    maskedKey = graph.credentials.maskedApiKey()
-    property = graph.orchestrator.propertyName()
-    pmsAddress = graph.orchestrator.pmsAddress()
+    // Vault + prefs reads can hit disk/Keystore on first access: keep them off Main.
+    withContext(Dispatchers.IO) {
+      staff = graph.orchestrator.staffIdentity()
+      maskedKey = graph.credentials.maskedApiKey()
+      property = graph.orchestrator.propertyName()
+      pmsAddress = graph.orchestrator.pmsAddress()
+    }
   }
   val lastSyncedText =
     remember(status.lastSyncedAt, languageTag) {

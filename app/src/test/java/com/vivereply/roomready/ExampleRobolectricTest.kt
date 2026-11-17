@@ -13,6 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.xmlpull.v1.XmlPullParser
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36])
@@ -324,6 +325,21 @@ class ExampleRobolectricTest {
     assertNotNull(ContextCompat.getDrawable(context, R.drawable.splash_background_compat))
     assertNotNull(ContextCompat.getDrawable(context, R.mipmap.ic_launcher))
     assertNotNull(ContextCompat.getDrawable(context, R.mipmap.ic_launcher_round))
+  }
+
+  @Test
+  fun `network security config blocks all cleartext traffic`() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val parser = context.resources.getXml(R.xml.network_security_config)
+    var blocked = false
+    var event = parser.eventType
+    while (event != XmlPullParser.END_DOCUMENT) {
+      if (event == XmlPullParser.START_TAG && parser.name == "base-config") {
+        blocked = parser.getAttributeValue(null, "cleartextTrafficPermitted") == "false"
+      }
+      event = parser.next()
+    }
+    assertTrue(blocked)
   }
 
   private fun Context.createLocalizedContext(languageTag: String): Context {

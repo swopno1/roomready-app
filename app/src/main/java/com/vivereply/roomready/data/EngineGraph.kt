@@ -44,6 +44,7 @@ class EngineGraph(context: Context, val clock: Clock = SystemClock) {
       database.activityDao(),
       database.syncQueueDao(),
       clock,
+      database,
     )
   }
 

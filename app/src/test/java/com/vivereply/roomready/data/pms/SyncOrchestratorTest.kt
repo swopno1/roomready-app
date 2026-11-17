@@ -64,6 +64,7 @@ class SyncOrchestratorTest {
         db.activityDao(),
         db.syncQueueDao(),
         FakeClock(),
+        db,
       )
     api = FakePmsApi()
     vault = FakeVault(null, null)

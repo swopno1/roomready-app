@@ -87,5 +87,6 @@ class ChecklistDurabilityTest {
       db.activityDao(),
       db.syncQueueDao(),
       SystemClock,
+      db,
     )
 }

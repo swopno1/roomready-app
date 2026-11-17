@@ -9,7 +9,9 @@ import com.vivereply.roomready.domain.model.StaffRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Sync status shown on Home and Profile. */
 data class SyncStatusUi(
@@ -52,8 +54,11 @@ class ConnectionViewModel(private val orchestrator: SyncOrchestrator) : ViewMode
           lastSyncedAt = orchestrator.lastSyncedAt(),
           pendingCount = orchestrator.pendingCount(),
         )
-      _role.value = runCatching { orchestrator.staffIdentity()?.role }.getOrNull()
-      _staffName.value = runCatching { orchestrator.staffIdentity()?.name }.getOrNull()
+      // One vault read, off Main: first access unlocks the Keystore.
+      val identity =
+        withContext(Dispatchers.IO) { runCatching { orchestrator.staffIdentity() }.getOrNull() }
+      _role.value = identity?.role
+      _staffName.value = identity?.name
     }
   }
 
